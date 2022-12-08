@@ -1,22 +1,26 @@
 import React from "react";
 import "@styles/NavbarBr.css";
 import { Container, Nav, Navbar, NavDropdown, Button } from "react-bootstrap";
+import { NavLink } from "react-router-dom";
 import Logo from "@assets/Logo.svg";
 
 export default function NavbarBr() {
   return (
     <Navbar className="color-nav">
       <Container>
-        <Navbar.Brand href="#home">
-          <img src={Logo} alt="Logo.svg" />
-          DBDB DIP
+        {/* <Navbar.Brand href="#home"> */}
+        <Navbar.Brand>
+          <NavLink to={`/`}>
+            <img src={Logo} alt="Logo.svg" />
+            DBDB DIP
+          </NavLink>
         </Navbar.Brand>
         <Nav className="me-auto">
-          <Nav.Link href="#raffle">Raffle</Nav.Link>
+          <NavLink to={`raffles`}>Raffles</NavLink>
           <NavDropdown title="Upload" id="uploadDropdown">
-            <NavDropdown.Item href="#NFTs">NFTs</NavDropdown.Item>
+            <NavLink to={`uploadnft`}>NFTs</NavLink>
           </NavDropdown>
-          <Nav.Link href="#market">Market</Nav.Link>
+          <NavLink to={`market`}>Market</NavLink>
         </Nav>
         <Button>Connect wallet</Button>
       </Container>
