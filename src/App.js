@@ -3,17 +3,19 @@ import NavbarBr from "./components/NavbarBr";
 import { Outlet } from "react-router-dom";
 import "./App.css";
 import Mintcard from "@molecules/Mintcard";
+import Connectwallet from "@molecules/Connectwallet";
 
 function App() {
-  console.log('app1');
 
   return (
-      <div className="App">
-        <NavbarBr />
-        <Outlet />
+    <div className="App">
+      <NavbarBr />
+      <Outlet />
 
-        {/* <Mintcard /> */}
-      </div>
+      <Mintcard />
+
+      <Connectwallet />
+    </div>
   );
 }
 

@@ -3,6 +3,7 @@ import "@styles/NavbarBr.css";
 import { Container, Nav, Navbar, NavDropdown, Button } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import Logo from "@assets/Logo.svg";
+import OnboardingButton from "@molecules/OnboardingButton";
 
 export default function NavbarBr() {
   return (
@@ -22,7 +23,7 @@ export default function NavbarBr() {
           </NavDropdown>
           <NavLink to={`market`}>Market</NavLink>
         </Nav>
-        <Button>Connect wallet</Button>
+        <OnboardingButton />
       </Container>
     </Navbar>
   );
