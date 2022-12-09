@@ -2,6 +2,7 @@ import React from "react";
 import "@styles/NavbarBr.css";
 import { Container, Nav, Navbar, NavDropdown, Button } from "react-bootstrap";
 import Logo from "@assets/Logo.svg";
+import OnboardingButton from "@molecules/OnboardingButton";
 
 export default function NavbarBr() {
   return (
@@ -18,7 +19,7 @@ export default function NavbarBr() {
           </NavDropdown>
           <Nav.Link href="#market">Market</Nav.Link>
         </Nav>
-        <Button>Connect wallet</Button>
+        <OnboardingButton />
       </Container>
     </Navbar>
   );
