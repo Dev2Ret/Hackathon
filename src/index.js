@@ -6,6 +6,8 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import ErrorPage from "@components/ErrorPage";
 import UploadNFT from "@components/UploadNFT";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.scss";
 
 const router = createBrowserRouter([
   {
