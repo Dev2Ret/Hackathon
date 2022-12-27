@@ -6,7 +6,7 @@ import Container from "react-bootstrap/Container";
 import { React, useState } from "react";
 
 const contentBoxStyle = {
-  padding: "8px",
+  padding: "16px",
   backgroundColor: "#FFF6DE",
   marginTop: "50px"
 };
@@ -81,6 +81,10 @@ export default function UploadNFT() {
           <RaffleCheck
             buttonWrapper={buttonWrapper}
             toRaffleTicket={toRaffleTicket}
+            selectedNFT={selectedNFT}
+            endTimestamp={endTimestamp}
+            totalTicketNum={totalTicketNum}
+            ticketPrice={ticketPrice}
           />
         ) : null}
       </Container>

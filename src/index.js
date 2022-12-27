@@ -1,40 +1,24 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider, Route } from "react-router-dom";
+import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import ErrorPage from "@components/ErrorPage";
-import UploadNFT from "@components/UploadNFT";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.scss";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <App />,
-    errorElement: <ErrorPage />,
-    children: [
-      {
-        path: "uploadnft",
-        element: <UploadNFT />,
-      },
-      {
-        path: "raffles",
-        element: <div>Raffles</div>,
-      },
-      {
-        path: "market",
-        element: <div>Market</div>,
-      },
-    ],
-  },
-]);
+// for local api server
+if (process.env.NODE_ENV === "development") {
+  const { worker } = require("./mock/browser");
+  worker.start({ onUnhandledRequest: "bypass" });
+}
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </React.StrictMode>
 );
 
