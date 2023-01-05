@@ -1,7 +1,7 @@
 import React from "react";
 import "@styles/NavbarBr.css";
 import { Container, Nav, Navbar, NavDropdown, Button } from "react-bootstrap";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import Logo from "@assets/Logo.svg";
 import OnboardingButton from "@molecules/OnboardingButton";
 
@@ -10,20 +10,21 @@ export default function NavbarBr() {
     <Navbar className="color-nav">
       <Container>
         {/* <Navbar.Brand href="#home"> */}
+
         <Navbar.Brand>
-          <NavLink to={`/`}>
+          <Nav.Link as={Link} to={"/"}>
             <img src={Logo} alt="Logo.svg" />
             DBDB DIP
-          </NavLink>
+          </Nav.Link>
         </Navbar.Brand>
         <Nav className="me-auto">
-          <NavLink to={`raffles`}>Raffles</NavLink>
+          <Nav.Link as={Link} to={"raffles/eth"}>Raffles</Nav.Link>
           <NavDropdown title="Upload" id="uploadDropdown">
-            <NavLink to={`uploadnft`}>NFTs</NavLink>
+            <Nav.Link as={Link} to={"uploadnft"}>NFTs</Nav.Link>
           </NavDropdown>
-          <NavLink to={`market`}>Market</NavLink>
+          <Nav.Link as={Link} to={"market"}>Market</Nav.Link>
         </Nav>
-        <OnboardingButton />
+        <OnboardingButton />        
       </Container>
     </Navbar>
   );

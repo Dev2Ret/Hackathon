@@ -1,18 +1,15 @@
-import { useRouteError } from "react-router-dom";
-import NavbarBr from "../components/NavbarBr";
+import { useLocation } from "react-router-dom";
 
 export default function NotFound() {
-  const error = useRouteError();
-  console.error(error);
+
+  let location = useLocation();
 
   return (
     <>
-      <NavbarBr />
       <div id="error-page">
         <h1>Oops!</h1>
-        <p>Sorry, an unexpected error has occurred.</p>
         <p>
-          <i>{error.statusText || error.message}</i>
+          No match for <code>{location.pathname}</code>
         </p>
       </div>
     </>

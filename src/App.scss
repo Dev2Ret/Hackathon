@@ -1,0 +1,15 @@
+/* make the customizations */
+$theme-colors: (
+  "primary":    #6d4c41,
+  // "secondary":  #ecc94b,
+  "secondary": #FFF6DE,
+  // "success":    $success,
+  // "info":       $info,
+  // "warning":    $warning,
+  // "danger":     $danger,
+  // "light":      $light,
+  // "dark":       $dark
+);
+
+/* import bootstrap to set changes */
+@import "~bootstrap/scss/bootstrap";

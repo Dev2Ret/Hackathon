@@ -1,20 +1,34 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import NavbarBr from "./components/NavbarBr";
-import { Outlet } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import Mintcard from "@molecules/Mintcard";
 import Connectwallet from "@molecules/Connectwallet";
+import Raffles from "@components/Raffles";
+import UploadNFT from "@components/UploadNFT";
+import NotFound from "@components/NotFound";
+import RaffleDetail from "@components/RaffleDetail";
 
 function App() {
 
   return (
     <div className="App">
-      <NavbarBr />
+      {/* <NavbarBr />
       <Outlet />
 
       <Mintcard />
 
-      <Connectwallet />
+      <Connectwallet /> */}
+      <NavbarBr />
+      <Routes>
+        <Route index element={<Mintcard />}></Route>
+        <Route path="raffles" element={<Raffles />}></Route>
+        <Route path="raffles/:chain" element={<Raffles />}></Route>
+        <Route path="raffles/:chain/:contractId" element={<RaffleDetail />}></Route>
+        <Route path="uploadnft" element={<UploadNFT />}></Route>
+        <Route path="market" element={<div>market</div>}></Route>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </div>
   );
 }
