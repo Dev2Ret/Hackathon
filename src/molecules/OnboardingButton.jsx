@@ -1,6 +1,7 @@
 import MetaMaskOnboarding from "@metamask/onboarding";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
+import { AccountContext } from "@contexts/AccountContext";
 
 const ONBOARD_TEXT = "Click here to install MetaMask!";
 const CONNECT_TEXT = "Connect";
@@ -15,6 +16,7 @@ export default function OnboardingButton() {
   useEffect(() => {
     if (!onboarding.current) {
       onboarding.current = new MetaMaskOnboarding();
+      console.log(onboarding.current);
     }
   }, []);
 
@@ -56,8 +58,11 @@ export default function OnboardingButton() {
     }
   };
   return (
-    <Button disabled={isDisabled} onClick={onClick}>
-      {buttonText}
-    </Button>
+    <>
+      <Button disabled={isDisabled} onClick={onClick}>
+        {buttonText}
+      </Button>
+      <AccountContext.Provider value={accounts} />
+    </>
   );
 }

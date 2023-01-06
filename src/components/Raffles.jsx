@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import { React, useState, useEffect, useContext } from "react";
 import {
   Container,
   Row,
@@ -15,6 +15,12 @@ import PolygonIcon from "@assets/PolygonIcon";
 import styled from "styled-components";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Web3 from "web3";
+import { providers } from "ethers";
+import MetaMaskOnboarding from "@metamask/onboarding";
+import { RaffleManagerMeta } from "@eth/contracts/RaffleManagerMeta";
+import { RaffleMeta } from "@eth/contracts/RaffleMeta";
+import { SelectedAddress, Contract } from "@eth/Web3";
 
 const contentBoxStyle = {
   padding: "16px",
@@ -38,6 +44,22 @@ export default function Raffles() {
   const [chain, setChain] = useState();
 
   let selectedChain = undefined;
+
+  // let web3 = new Web3(process.env.REACT_APP_WEB3_PROVIDER);
+  // console.log("web3 1 : ", web3.currentProvider);
+  // if (window.ethereum !== undefined) {
+  //   if (MetaMaskOnboarding.isMetaMaskInstalled()) {
+  //     web3 = new Web3(window.ethereum);
+  //     window.ethereum.request({ method: "eth_requestAccounts" }).then((acc) => {
+  //       web3 = new Web3(window.ethereum);
+  //       console.log("web3 3 : ", web3.currentProvider);
+  //     })
+  //   }
+  // }
+
+  // console.log('web3 2 : ', web3.currentProvider);
+
+  // raffleManagerContract.showAll().call().then(console.log);
 
   useEffect(() => {
 
@@ -110,8 +132,35 @@ export default function Raffles() {
     return <p>Error!!</p>;
   }
 
+  let raffleManager = Contract(RaffleManagerMeta);
+  let raffle = Contract(RaffleMeta);
+
+  function methodShowAll() {
+    raffleManager.methods.showAll().call().then((result) => {
+      console.log("showAll success", result);
+    });
+  }
+
+  function methodCreateAnotherContract(num) {
+    raffleManager.methods
+      .createAnotherContract(num)
+      .send({ from: SelectedAddress() })
+      .then((result) => {
+        console.log("success!!", result);
+      });
+  }
+
+  function methodGetValue() {
+    raffle.methods.getValue().call().then((result) => {
+      console.log("getValue success", result);
+    })
+  }
+
   return (
-    <Container style={contentBoxStyle}>
+    <Container style={contentBoxStyle} onClick={() => {
+      methodShowAll();
+      methodGetValue();
+    }}>
       <Stack direction="horizontal" style={filterLayerStyle}>
         <Dropdown>
           <Dropdown.Toggle

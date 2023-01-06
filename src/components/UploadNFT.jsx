@@ -4,6 +4,11 @@ import RaffleTicket from "@molecules/RaffleTicket";
 import RaffleCheck from "@molecules/RaffleCheck";
 import Container from "react-bootstrap/Container";
 import { React, useState } from "react";
+import { ConnectedWeb3, Contract, SelectedAddress } from "@eth/Web3";
+import ERC721ABI from "@eth/ERC721ABI"
+import { useEffect } from "react";
+import { useContext } from "react";
+import { AccountContext } from "@contexts/AccountContext";
 
 const contentBoxStyle = {
   padding: "16px",
@@ -18,6 +23,40 @@ const buttonWrapper = {
 }
 
 export default function UploadNFT() {
+
+  const accounts = useContext(AccountContext);
+
+  // let account = ConnectedWeb3().eth.givenProvider.SelectedAddress;
+
+
+  // useEffect(() => {
+  //   console.log("accounts", accounts);
+  // }, [accounts]);
+
+  // console.log(SelectedAddress());
+
+  // // console.log("ddddddddd", ConnectedWeb3());
+  // // ConnectedWeb3.eth.getBalance(SelectedAddress);
+  // const web3 = ConnectedWeb3();
+  // // console.log(web3.eth.getBalance)
+  // // console.log(SelectedAddress())
+  // web3.eth.getBalance("0x09f6cb5796d1aa7f731aaddbd0a68a7660ffce86").then((rs) => {
+  //   web3.eth.toDecimal(rs);
+  //   console.log(rs);
+  // })
+  // // console.log("balance", balance);
+
+
+  // const tokenContract = "0x317a8Fe0f1C7102e7674aB231441E485c64c178A";
+  // const contract = Contract({abi: ERC721ABI, address: tokenContract });
+
+  // async function getNFTMetadata() {
+  //   const result = await contract.methods.tokenURI(254833).call();
+
+  //   console.log(result);
+  // }
+
+  // getNFTMetadata();
 
   const myNFTs = [
     { id: 1, name: "COOL CAT #6337" },
@@ -51,6 +90,7 @@ export default function UploadNFT() {
   return (
     <>
       <Container style={contentBoxStyle}>
+        <p>{accounts}</p>
         {uploadStep === 1 ? (
           <RaffleNFT
             buttonWrapper={buttonWrapper}
