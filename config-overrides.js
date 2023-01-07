@@ -10,6 +10,8 @@ module.exports = override(
     "@contexts": path.resolve(__dirname, "src", "contexts"),
     "@atoms": path.resolve(__dirname, "src", "atoms"),
     "@molecules": path.resolve(__dirname, "src", "molecules"),
+    "@contracts": path.resolve(__dirname, "src", "contracts"),
+    "@eth": path.resolve(__dirname, "src", "eth"),
   }),
   ...addBabelPlugins(["babel-plugin-styled-components"])
 );

@@ -1,4 +1,5 @@
 import { rest } from "msw";
+import Web3 from "web3";
 
 const raffle1 = {
   contractId: "0x0123456789abcdef1",
@@ -104,10 +105,35 @@ const handlers = [
   rest.get("/api/raffles", (req, res, ctx) => {
     return res(
       ctx.status(200),
-      ctx.delay(1500),
       ctx.json([raffle1, raffle2, raffle3, raffle4, raffle5])
     );
   }),
+
+  // rest.get("/api/showall", async (req, res, ctx) => {
+
+  //   const web3 = new Web3(process.env.REACT_APP_WEB3_PROVIDER);
+
+  //   let contract = new web3.eth.Contract(
+  //     RaffleABI,
+  //     "0x6355f6638e4a005c3bf94f1d0ffe7161072950bd"
+  //   );
+
+
+  //   let result = await contract.methods.showAll().call();
+  //   return res(
+  //     ctx.status(200),
+  //     ctx.json(result)
+  //   );
+
+  //   // return res(
+  //   //   ctx.status(200), ctx
+  //   // )
+  // }),
 ];
+
+
+
+
+
 
 export default handlers;

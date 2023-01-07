@@ -10,7 +10,6 @@ export default function NavbarBr() {
     <Navbar className="color-nav">
       <Container>
         {/* <Navbar.Brand href="#home"> */}
-
         <Navbar.Brand>
           <Nav.Link as={Link} to={"/"}>
             <img src={Logo} alt="Logo.svg" />
@@ -24,7 +23,7 @@ export default function NavbarBr() {
           </NavDropdown>
           <Nav.Link as={Link} to={"market"}>Market</Nav.Link>
         </Nav>
-        <OnboardingButton />        
+        <OnboardingButton />
       </Container>
     </Navbar>
   );
