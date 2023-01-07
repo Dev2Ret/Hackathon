@@ -1,6 +1,9 @@
 import { React } from "react";
+import { useNavigate } from "react-router-dom";
 import { Row, Col, Button, Image, Stack } from "react-bootstrap";
 import styled from "styled-components";
+import { Contract } from "@eth/Web3";
+import { RaffleManagerMeta } from "src/eth/contracts/RaffleManagerMeta";
 
 const raffleContainer = {
   margin: "10px 0",
@@ -58,16 +61,61 @@ export default function RaffleCheck({
   endTimestamp,
   totalTicketNum,
   ticketPrice,
+  accounts,
 }) {
+  const navigate = useNavigate();
 
   let dt = new Date(endTimestamp);
-  let stringDt = (
-    dt.getFullYear() + "년 " + 
-    (dt.getMonth() + 1) + "월 " +
-    (dt.getDate()) + "일 " +
-    (dt.getHours()) + "시 " +
-    (dt.getMinutes()) + "분"
+  let stringDt =
+    dt.getFullYear() +
+    "년 " +
+    (dt.getMonth() + 1) +
+    "월 " +
+    dt.getDate() +
+    "일 " +
+    dt.getHours() +
+    "시 " +
+    dt.getMinutes() +
+    "분";
+
+  let ticketPricePointer = 0;
+  let ticketPriceInteger = ticketPrice;
+
+  while (Math.floor(ticketPriceInteger) !== ticketPriceInteger) {
+    ticketPricePointer += 1;
+    ticketPriceInteger *= 10;
+  }
+
+  console.log(
+    ticketPriceInteger,
+    ticketPricePointer,
+    ticketPriceInteger / Math.pow(10, ticketPricePointer)
   );
+
+  function createRaffle() {
+    let ticketPricePointer = 0;
+    let ticketPriceInteger = ticketPrice;
+
+    while (Math.floor(ticketPriceInteger) !== ticketPriceInteger) {
+      ticketPricePointer += 1;
+      ticketPriceInteger *= 10;
+    }
+
+    Contract(RaffleManagerMeta)
+      .methods.createRaffle(
+        endTimestamp,
+        totalTicketNum,
+        ticketPriceInteger,
+        ticketPricePointer
+      )
+      .send({ from: accounts[0] })
+      .then((receipt) => {
+        navigate(
+          `/raffles/eth/` +
+            receipt.events.NFTRaffleCreated.returnValues.raffleAddress
+        );
+      });
+  }
 
   return (
     <>
@@ -143,7 +191,7 @@ export default function RaffleCheck({
             style={fullyWidenStyle}
             variant="primary"
             // disabled={selectedNFT === undefined}
-            onClick={console.log("finish")}
+            onClick={createRaffle}
           >
             완료
           </Button>

@@ -11,6 +11,7 @@ const contentBoxStyle = {
   padding: "16px",
   backgroundColor: "#FFF6DE",
   marginTop: "50px",
+  // width: "fit-content",
 };
 
 const buttonWrapper = {
@@ -90,13 +91,11 @@ export default function UploadNFT() {
   return (
     <>
       <Container
-        style={contentBoxStyle}
-        onClick={() => {
-          // console.log("acc : ", accounts)
-        }}
-      >
-        {/* <p>account : {accounts}</p> */}
-        {uploadStep === 1 ? (
+        style={contentBoxStyle}>
+        { accounts.length < 1 ? (
+          <p>지갑이 연결되어 있지 않습니다.</p>
+        ) :
+        uploadStep === 1 ? (
           <RaffleNFT
             fullyWidenStyle={fullyWidenStyle}
             buttonWrapper={buttonWrapper}
@@ -134,6 +133,7 @@ export default function UploadNFT() {
             endTimestamp={endTimestamp}
             totalTicketNum={totalTicketNum}
             ticketPrice={ticketPrice}
+            accounts={accounts}
           />
         ) : null}
       </Container>

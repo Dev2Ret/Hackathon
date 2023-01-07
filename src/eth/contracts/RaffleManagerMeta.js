@@ -1,33 +1,103 @@
 export const RaffleManagerMeta = {
-  address: "0x6355f6638e4a005c3bf94f1d0ffe7161072950bd",
+  address: "0xFd1Fc4Ec69CBeC06940DB2772502aE1cC1152233",
   abi: [
     {
-      inputs: [{ internalType: "uint256", name: "value", type: "uint256" }],
-      name: "createAnotherContract",
-      outputs: [{ internalType: "address", name: "", type: "address" }],
+      inputs: [],
+      stateMutability: "nonpayable",
+      type: "constructor",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "expiredAt",
+          type: "uint256",
+        },
+        {
+          indexed: false,
+          internalType: "uint16",
+          name: "ticketCap",
+          type: "uint16",
+        },
+        {
+          indexed: false,
+          internalType: "uint32",
+          name: "ticketPrice",
+          type: "uint32",
+        },
+        {
+          indexed: false,
+          internalType: "uint8",
+          name: "ticketPricePointer",
+          type: "uint8",
+        },
+        {
+          indexed: false,
+          internalType: "address",
+          name: "raffleAddress",
+          type: "address",
+        },
+      ],
+      name: "NFTRaffleCreated",
+      type: "event",
+    },
+    {
+      inputs: [],
+      name: "checkExpiredRaffles",
+      outputs: [],
       stateMutability: "nonpayable",
       type: "function",
     },
     {
       inputs: [],
-      name: "showAll",
-      outputs: [{ internalType: "uint256[]", name: "", type: "uint256[]" }],
-      stateMutability: "view",
+      name: "closeRaffle",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "expiredAt",
+          type: "uint256",
+        },
+        {
+          internalType: "uint16",
+          name: "ticketCap",
+          type: "uint16",
+        },
+        {
+          internalType: "uint32",
+          name: "ticketPrice",
+          type: "uint32",
+        },
+        {
+          internalType: "uint8",
+          name: "ticketPricePointer",
+          type: "uint8",
+        },
+      ],
+      name: "createRaffle",
+      outputs: [],
+      stateMutability: "nonpayable",
       type: "function",
     },
     {
       inputs: [],
-      name: "showAllAddrs",
-      outputs: [{ internalType: "address[]", name: "", type: "address[]" }],
-      stateMutability: "view",
+      name: "deleteRaffle",
+      outputs: [],
+      stateMutability: "nonpayable",
       type: "function",
     },
     {
       inputs: [],
-      name: "showAllContracts",
+      name: "getRaffles",
       outputs: [
         {
-          internalType: "contract AnotherContract[]",
+          internalType: "contract Raffle[]",
           name: "",
           type: "address[]",
         },
@@ -35,5 +105,5 @@ export const RaffleManagerMeta = {
       stateMutability: "view",
       type: "function",
     },
-  ]
+  ],
 };
