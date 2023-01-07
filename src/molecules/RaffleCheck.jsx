@@ -51,6 +51,7 @@ const ContentItem = styled.div `
 `;
 
 export default function RaffleCheck({
+  fullyWidenStyle,
   buttonWrapper,
   toRaffleTicket,
   selectedNFT,
@@ -127,8 +128,9 @@ export default function RaffleCheck({
       </Row>
 
       <Row className="justify-content-md-center">
-        <Col style={buttonWrapper} lg="2">
+        <Col style={buttonWrapper}>
           <Button
+            style={fullyWidenStyle}
             variant="primary"
             // disabled={selectedNFT === undefined}
             onClick={toRaffleTicket}
@@ -136,8 +138,9 @@ export default function RaffleCheck({
             이전
           </Button>
         </Col>
-        <Col style={buttonWrapper} lg="2">
+        <Col style={buttonWrapper}>
           <Button
+            style={fullyWidenStyle}
             variant="primary"
             // disabled={selectedNFT === undefined}
             onClick={console.log("finish")}

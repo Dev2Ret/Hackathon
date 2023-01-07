@@ -14,6 +14,7 @@ const formControlStyle = {
 }
 
 export default function RaffleTicket({
+  fullyWidenStyle,
   buttonWrapper,
   toRaffleTime,
   toRaffleCheck,
@@ -62,13 +63,18 @@ export default function RaffleTicket({
       </Form>
 
       <Row className="justify-content-md-center">
-        <Col style={buttonWrapper} lg="2">
-          <Button variant="primary" onClick={toRaffleTime}>
+        <Col style={buttonWrapper}>
+          <Button
+            style={fullyWidenStyle}
+            variant="primary"
+            onClick={toRaffleTime}
+          >
             이전
           </Button>
         </Col>
-        <Col style={buttonWrapper} lg="2">
+        <Col style={buttonWrapper}>
           <Button
+            style={fullyWidenStyle}
             variant="primary"
             disabled={totalTicketNum <= 0 || ticketPrice <= 0}
             onClick={toRaffleCheck}

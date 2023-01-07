@@ -13,8 +13,8 @@ export const Contract = (meta) => {
   return new web3.eth.Contract(meta.abi, meta.address);
 }
 
-export const SelectedAddress = () => {
-  return web3.eth.givenProvider.selectedAddress;
-}
+// export const SelectedAddress = () => {
+//   return web3.eth.givenProvider.selectedAddress;
+// }
 
 

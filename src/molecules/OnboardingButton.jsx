@@ -1,7 +1,7 @@
 import MetaMaskOnboarding from "@metamask/onboarding";
 import { useState, useEffect, useRef } from "react";
 import { Button } from "react-bootstrap";
-import { AccountContext } from "@contexts/AccountContext";
+import { useAccountsContext } from "@contexts/AccountsContext";
 
 const ONBOARD_TEXT = "Click here to install MetaMask!";
 const CONNECT_TEXT = "Connect";
@@ -10,7 +10,7 @@ const CONNECTED_TEXT = "Connected";
 export default function OnboardingButton() {
   const [buttonText, setButtonText] = useState(ONBOARD_TEXT);
   const [isDisabled, setDisabled] = useState(false);
-  const [accounts, setAccounts] = useState([]);
+  const [accounts, setAccounts] = useAccountsContext();
   const onboarding = useRef();
 
   useEffect(() => {
@@ -33,26 +33,13 @@ export default function OnboardingButton() {
     }
   }, [accounts]);
 
-  useEffect(() => {
-    function handleNewAccounts(newAccounts) {
-      setAccounts(newAccounts);
-    }
-    if (MetaMaskOnboarding.isMetaMaskInstalled()) {
-      window.ethereum
-        .request({ method: "eth_requestAccounts" })
-        .then(handleNewAccounts);
-      window.ethereum.on("accountsChanged", handleNewAccounts);
-      return () => {
-        window.ethereum.removeListener("accountsChanged", handleNewAccounts);
-      };
-    }
-  }, []);
-
   const onClick = () => {
     if (MetaMaskOnboarding.isMetaMaskInstalled()) {
       window.ethereum
         .request({ method: "eth_requestAccounts" })
-        .then((newAccounts) => setAccounts(newAccounts));
+        .then((newAccounts) => {
+          setAccounts(newAccounts);
+        });
     } else {
       onboarding.current.startOnboarding();
     }
@@ -62,7 +49,6 @@ export default function OnboardingButton() {
       <Button disabled={isDisabled} onClick={onClick}>
         {buttonText}
       </Button>
-      <AccountContext.Provider value={accounts} />
     </>
   );
 }

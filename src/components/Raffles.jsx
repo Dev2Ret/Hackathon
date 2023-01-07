@@ -7,7 +7,7 @@ import {
   Image,
   Card,
   ToggleButton,
-  Stack
+  Stack,
 } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 import EthereumIcon from "@assets/EthereumIcon";
@@ -15,12 +15,10 @@ import PolygonIcon from "@assets/PolygonIcon";
 import styled from "styled-components";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import Web3 from "web3";
-import { providers } from "ethers";
-import MetaMaskOnboarding from "@metamask/onboarding";
 import { RaffleManagerMeta } from "@eth/contracts/RaffleManagerMeta";
 import { RaffleMeta } from "@eth/contracts/RaffleMeta";
-import { SelectedAddress, Contract } from "@eth/Web3";
+import { Contract } from "@eth/Web3";
+import { useAccountsValueContext } from "@contexts/AccountsContext";
 
 const contentBoxStyle = {
   padding: "16px",
@@ -29,7 +27,6 @@ const contentBoxStyle = {
 };
 
 export default function Raffles() {
-
   const navigate = useNavigate();
   const params = useParams();
 
@@ -42,27 +39,11 @@ export default function Raffles() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [chain, setChain] = useState();
+  const accounts = useAccountsValueContext();
 
   let selectedChain = undefined;
 
-  // let web3 = new Web3(process.env.REACT_APP_WEB3_PROVIDER);
-  // console.log("web3 1 : ", web3.currentProvider);
-  // if (window.ethereum !== undefined) {
-  //   if (MetaMaskOnboarding.isMetaMaskInstalled()) {
-  //     web3 = new Web3(window.ethereum);
-  //     window.ethereum.request({ method: "eth_requestAccounts" }).then((acc) => {
-  //       web3 = new Web3(window.ethereum);
-  //       console.log("web3 3 : ", web3.currentProvider);
-  //     })
-  //   }
-  // }
-
-  // console.log('web3 2 : ', web3.currentProvider);
-
-  // raffleManagerContract.showAll().call().then(console.log);
-
   useEffect(() => {
-
     if (selectedChain !== undefined && chain === undefined) {
       setChain(selectedChain);
     }
@@ -136,31 +117,40 @@ export default function Raffles() {
   let raffle = Contract(RaffleMeta);
 
   function methodShowAll() {
-    raffleManager.methods.showAll().call().then((result) => {
-      console.log("showAll success", result);
-    });
+    raffleManager.methods
+      .showAll()
+      .call()
+      .then((result) => {
+        console.log("showAll success", result);
+      });
   }
 
   function methodCreateAnotherContract(num) {
     raffleManager.methods
       .createAnotherContract(num)
-      .send({ from: SelectedAddress() })
+      .send({ from: accounts[0] })
       .then((result) => {
         console.log("success!!", result);
       });
   }
 
   function methodGetValue() {
-    raffle.methods.getValue().call().then((result) => {
-      console.log("getValue success", result);
-    })
+    raffle.methods
+      .getValue()
+      .call()
+      .then((result) => {
+        console.log("getValue success", result);
+      });
   }
 
   return (
-    <Container style={contentBoxStyle} onClick={() => {
-      methodShowAll();
-      methodGetValue();
-    }}>
+    <Container
+      style={contentBoxStyle}
+      onClick={() => {
+        methodShowAll();
+        methodGetValue();
+      }}
+    >
       <Stack direction="horizontal" style={filterLayerStyle}>
         <Dropdown>
           <Dropdown.Toggle

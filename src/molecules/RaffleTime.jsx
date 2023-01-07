@@ -10,6 +10,7 @@ const DatetimeWrapper = styled.div`
 `;
 
 export default function RaffleTime({
+  fullyWidenStyle,
   buttonWrapper,
   toRaffleNFT,
   toRaffleTicket,
@@ -27,8 +28,14 @@ export default function RaffleTime({
           initialValue={initDate}
           dateFormat="YYYY-MM-DD"
           onChange={(moment) => {
-            if(isMoment(moment)) {
-              setEndTimestamp(moment.unix() * 1000);
+            if (isMoment(moment)) {
+              const now = new Date().getTime();
+              const endTime = moment.unix() * 1000;
+              if(endTime - (60 * 60 * 1000) > now) {
+                setEndTimestamp(moment.unix() * 1000);
+              } else {
+                setEndTimestamp(undefined);  
+              }
             } else {
               setEndTimestamp(undefined);
             }
@@ -36,17 +43,20 @@ export default function RaffleTime({
         />
       </DatetimeWrapper>
 
-      <Row className="justify-content-md-center">
-        <Col style={buttonWrapper} lg="2">
+      {/* <Row className="justify-content-md-center"> */}
+      <Row>
+        <Col style={buttonWrapper}>
           <Button
+            style={fullyWidenStyle}
             variant="primary"
             onClick={toRaffleNFT}
           >
             이전
           </Button>
         </Col>
-        <Col style={buttonWrapper} lg="2">
+        <Col style={buttonWrapper}>
           <Button
+            style={fullyWidenStyle}
             variant="primary"
             disabled={endTimestamp === undefined}
             onClick={toRaffleTicket}

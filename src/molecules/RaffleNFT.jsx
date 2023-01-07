@@ -30,6 +30,7 @@ const NFTName = styled.p`
 `;
 
 export default function RaffleNFT({
+  fullyWidenStyle,
   buttonWrapper,
   toRaffleTime,
   myNFTs,
@@ -69,8 +70,9 @@ export default function RaffleNFT({
         </Col>
       </Row>
       <Row className="justify-content-md-center">
-        <Col style={buttonWrapper} lg="2">
+        <Col style={buttonWrapper}>
           <Button
+            style={fullyWidenStyle}
             variant="primary"
             disabled={selectedNFT === undefined}
             onClick={toRaffleTime}
