@@ -4,6 +4,7 @@ import { Row, Col, Button, Image, Stack } from "react-bootstrap";
 import styled from "styled-components";
 import { Contract } from "@eth/Web3";
 import { RaffleManagerMeta } from "src/eth/contracts/RaffleManagerMeta";
+import { Exception } from "sass";
 
 const raffleContainer = {
   margin: "10px 0",
@@ -92,6 +93,13 @@ export default function RaffleCheck({
     ticketPriceInteger / Math.pow(10, ticketPricePointer)
   );
 
+  function parseNFTTokenTypeToInt(tokenType) {
+    if(tokenType === "ERC721") return 721;
+    else if(tokenType === "ERC1155") return 1155;
+    else return 20;
+    // else throw Exception;
+  }
+
   function createRaffle() {
     let ticketPricePointer = 0;
     let ticketPriceInteger = ticketPrice;
@@ -103,6 +111,10 @@ export default function RaffleCheck({
 
     Contract(RaffleManagerMeta)
       .methods.createRaffle(
+        accounts[0],
+        selectedNFT.contract.address,
+        selectedNFT.tokenId,
+        parseNFTTokenTypeToInt(selectedNFT.tokenType),
         endTimestamp,
         totalTicketNum,
         ticketPriceInteger,
