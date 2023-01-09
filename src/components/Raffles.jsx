@@ -13,7 +13,7 @@ import Dropdown from "react-bootstrap/Dropdown";
 import EthereumIcon from "@assets/EthereumIcon";
 import PolygonIcon from "@assets/PolygonIcon";
 import styled from "styled-components";
-import { useParams, useNavigate, json } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { RaffleManagerMeta } from "@eth/contracts/RaffleManagerMeta";
 import { RaffleMeta } from "@eth/contracts/RaffleMeta";

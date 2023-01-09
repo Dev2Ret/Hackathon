@@ -2,12 +2,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import NavbarBr from "./components/NavbarBr";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
+import { AccountsProvider } from "@contexts/AccountsContext";
 import Mintcard from "@molecules/Mintcard";
 import Raffles from "@components/Raffles";
 import UploadNFT from "@components/UploadNFT";
 import NotFound from "@components/NotFound";
 import RaffleDetail from "@components/RaffleDetail";
-import { AccountsProvider } from "@contexts/AccountsContext";
+import Dashboard from "@components/Dashboard";
 
 function App() {
   return (
@@ -23,7 +24,8 @@ function App() {
             element={<RaffleDetail />}
           ></Route>
           <Route path="uploadnft" element={<UploadNFT />}></Route>
-          <Route path="market" element={<div>market</div>}></Route>
+          <Route path="dashboard" element={<Dashboard />}></Route>
+          {/* <Route path="market" element={<div>market</div>}></Route> */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AccountsProvider>
