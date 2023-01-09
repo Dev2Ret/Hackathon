@@ -4,7 +4,6 @@ import { Row, Col, Button, Image, Stack } from "react-bootstrap";
 import styled from "styled-components";
 import { Contract } from "@eth/Web3";
 import { RaffleManagerMeta } from "src/eth/contracts/RaffleManagerMeta";
-import { Exception } from "sass";
 
 const raffleContainer = {
   margin: "10px 0",
@@ -96,38 +95,74 @@ export default function RaffleCheck({
   function parseNFTTokenTypeToInt(tokenType) {
     if(tokenType === "ERC721") return 721;
     else if(tokenType === "ERC1155") return 1155;
-    else return 20;
-    // else throw Exception;
+    else throw new Error("Not NFT token");
   }
 
-  function createRaffle() {
+  async function createRaffle() {
     let ticketPricePointer = 0;
     let ticketPriceInteger = ticketPrice;
 
-    while (Math.floor(ticketPriceInteger) !== ticketPriceInteger) {
+    while (ticketPriceInteger !== Math.floor(ticketPriceInteger)) {
       ticketPricePointer += 1;
-      ticketPriceInteger *= 10;
+      ticketPriceInteger = parseFloat((ticketPriceInteger * 10).toFixed(4));
     }
 
-    Contract(RaffleManagerMeta)
+    const receipt = await Contract(RaffleManagerMeta)
       .methods.createRaffle(
         accounts[0],
         selectedNFT.contract.address,
         selectedNFT.tokenId,
         parseNFTTokenTypeToInt(selectedNFT.tokenType),
-        endTimestamp,
+        endTimestamp / 1000,
         totalTicketNum,
         ticketPriceInteger,
         ticketPricePointer
       )
-      .send({ from: accounts[0] })
-      .then((receipt) => {
-        navigate(
-          `/raffles/eth/` +
-            receipt.events.NFTRaffleCreated.returnValues.raffleAddress
-        );
-      });
+      .send({ from: accounts[0] });
+
+    console.log("rs : ", receipt);
+
+    navigate(
+      `/raffles/eth/` +
+        receipt.events.NFTRaffleCreated.returnValues.raffleAddress
+    );
+
+    // .then((receipt) => {
+    //   navigate(
+    //     `/raffles/eth/` +
+    //       receipt.events.NFTRaffleCreated.returnValues.raffleAddress
+    //   );
+    // });
   }
+
+  // function createRaffle() {
+  //   let ticketPricePointer = 0;
+  //   let ticketPriceInteger = ticketPrice;
+
+  //   while (Math.floor(ticketPriceInteger) !== ticketPriceInteger) {
+  //     ticketPricePointer += 1;
+  //     ticketPriceInteger *= 10;
+  //   }
+
+  //   Contract(RaffleManagerMeta)
+  //     .methods.createRaffle(
+  //       accounts[0],
+  //       selectedNFT.contract.address,
+  //       selectedNFT.tokenId,
+  //       parseNFTTokenTypeToInt(selectedNFT.tokenType),
+  //       endTimestamp / 1000,
+  //       totalTicketNum,
+  //       ticketPriceInteger,
+  //       ticketPricePointer
+  //     )
+  //     .send({ from: accounts[0] })
+  //     .then((receipt) => {
+  //       navigate(
+  //         `/raffles/eth/` +
+  //           receipt.events.NFTRaffleCreated.returnValues.raffleAddress
+  //       );
+  //     });
+  // }
 
   return (
     <>
@@ -176,10 +211,10 @@ export default function RaffleCheck({
             <ContentItem className="bg-light border">
               <Row>
                 <Col sm={4} style={contentTitleStyle}>
-                  컨트랙트 주소
+                  NFT 컨트랙트
                 </Col>
                 <Col sm={8} style={contentItemStyle}>
-                  0xabcdef0123456789abcdef0123456789
+                  {selectedNFT.contract.address}
                 </Col>
               </Row>
             </ContentItem>

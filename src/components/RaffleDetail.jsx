@@ -3,6 +3,9 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Row, Col, Container, Image, Button, Stack } from "react-bootstrap";
 import styled from "styled-components";
+import { useAccountsValueContext } from "@contexts/AccountsContext";
+import { Contract } from "@eth/Web3";
+import { RaffleMeta } from "@eth/contracts/RaffleMeta";
 
 const leftItemStyle = {
   backgroundColor: "red",
@@ -52,6 +55,7 @@ const ContractAddressContainer = styled.div``;
 
 export default function RaffleDetail() {
 
+  const accounts = useAccountsValueContext();
   const [raffle, setRaffle] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -60,10 +64,18 @@ export default function RaffleDetail() {
   const params = useParams();
 
   useEffect(() => {
+    if(accounts.length > 0) {
+
+    } else {
+      
+    }
+  }, [accounts, raffle]);
+
+  useEffect(() => {
     const id = setInterval(() => {
       if(raffle !== undefined) {
         const date = new Date();
-        let timeDiffSecs = raffle.ended - parseInt(date.getTime() / 1000);
+        let timeDiffSecs = raffle.expiredAt - parseInt(date.getTime() / 1000);
         setTimeDiff(timeDiffSecs);
       }
       
@@ -94,12 +106,111 @@ export default function RaffleDetail() {
       setIsLoading(true);
       setIsError(false);
       try {
-        const results = await axios(
-          "http://localhost:3000/api/raffles/" + params.contractId
-        );
-        setRaffle(results.data);
+
+        const raffleMeta = {
+          address: params.contractId,
+          abi: RaffleMeta.abi
+        };
+
+        const results = await Contract(raffleMeta).methods.getRaffle().call();
+
+
+
+        console.log(results);
+
+        const tokenURIABI = [
+          {
+            inputs: [
+              {
+                internalType: "uint256",
+                name: "tokenId",
+                type: "uint256",
+              },
+            ],
+            name: "tokenURI",
+            outputs: [
+              {
+                internalType: "string",
+                name: "",
+                type: "string",
+              },
+            ],
+            stateMutability: "view",
+            type: "function",
+          },
+        ];
+
+        const tokenContract = results[1];
+        const tokenId = parseInt(results[2]); // A token we'd like to retrieve its metadata of
+
+        const nftMeta = {
+          address: tokenContract,
+          abi: tokenURIABI
+        }
+        const contract = Contract(nftMeta);
+
+        async function getNFTMetadata() {
+          const result = await contract.methods.tokenURI(tokenId).call();
+          // const result = await contract.methods.ownerOf(tokenId).call();
+
+          console.log("nft result ", result); // ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/101
+
+          // const ipfsURL = addIPFSProxy(result);
+
+          // const request = new Request(ipfsURL);
+          // const response = await fetch(request);
+          // const metadata = await response.json();
+          // console.log("nft meta result ", metadata); // Metadata in JSON
+
+          // const image = addIPFSProxy(metadata.image);
+        }
+
+        getNFTMetadata();
+
+        // function addIPFSProxy(ipfsHash) {
+        //   const URL = "https://<YOUR_SUBDOMAIN>.infura-ipfs.io/ipfs/";
+        //   const hash = ipfsHash.replace(/^ipfs?:\/\//, "");
+        //   const ipfsURL = URL + hash;
+
+        //   console.log(ipfsURL); // https://<subdomain>.infura-ipfs.io/ipfs/<ipfsHash>
+        //   return ipfsURL;
+        // }
+
+
+
+
+
+
+
+
+
+        const raffle = {
+          owner: results[0],
+          nftContractAddress: results[1],
+          nftTokenId: parseInt(results[2]),
+          nftTokenType: parseInt(results[3]),
+          expiredAt: parseInt(results[4]),
+          ticketCap: parseInt(results[5]),
+          ticketPrice: parseInt(results[6]),
+          ticketPricePointer: parseInt(results[7])
+        }
+        
+        setRaffle(raffle);
+        
+        // Contract(raffleMeta)
+        //   .methods.getRaffle()
+        //   .call()
+        //   .then((result) => {
+        //     console.log("getRaffle success", result);
+        //   });
+
+        // const results = await axios(
+        //   "http://localhost:3000/api/raffles/" + params.contractId
+        // );
+        // setRaffle(results.data);
         setIsLoading(false);
-      } catch {
+      } catch(e) {
+        console.log(e)
         setIsError(true);
         setIsLoading(false);
       }
@@ -129,7 +240,7 @@ export default function RaffleDetail() {
           </Col>
           <Col sm={4} style={rightItemStyle} className="bg-info">
             <Stack style={contentsContainer}>
-              <RaffleContentsHeader>{raffle.nft.name}</RaffleContentsHeader>
+              {/* <RaffleContentsHeader>{raffle.nft.name}</RaffleContentsHeader> */}
               <RaffleContentsBody>
                 <TimeContainer>
                   남은 시간 : {findTimeDiffInDays(timeDiff)}일{" "}
@@ -138,13 +249,14 @@ export default function RaffleDetail() {
                   {findTimeDiffInSecs(timeDiff)}초{" "}
                 </TimeContainer>
                 <TicketsContainer>
-                  남은 티켓 수량 : {raffle.totalTicketNum}
+                  남은 티켓 수량 : {raffle.ticketCap}
                 </TicketsContainer>
                 <TicketPriceContainer>
-                  티켓 가격 : {raffle.ticketPrice}
+                  티켓 가격 :{" "}
+                  {raffle.ticketPrice / Math.pow(10, raffle.ticketPricePointer)}
                 </TicketPriceContainer>
                 <ContractAddressContainer>
-                  컨트랙트 주소 : 0x1234567890abcdef
+                  컨트랙트 주소 : {raffle.nftContractAddress}
                 </ContractAddressContainer>
               </RaffleContentsBody>
               <RaffleContentsFooter className="d-grid gap-2">

@@ -1,8 +1,28 @@
 export const RaffleMeta = {
-  address: "0x8f79eD685c89719c1aa283e6c606653D954e3d50",
+  address: "",
   abi: [
     {
       inputs: [
+        {
+          internalType: "address",
+          name: "_owner",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "_nftContract",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "_nftTokenId",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "_nftTokenType",
+          type: "uint256",
+        },
         {
           internalType: "uint256",
           name: "_expiredAt",
@@ -29,7 +49,7 @@ export const RaffleMeta = {
     },
     {
       inputs: [],
-      name: "getExpiredAt",
+      name: "expiredAt",
       outputs: [
         {
           internalType: "uint256",
@@ -57,9 +77,9 @@ export const RaffleMeta = {
               type: "uint256",
             },
             {
-              internalType: "uint256",
+              internalType: "uint16",
               name: "tickets",
-              type: "uint256",
+              type: "uint16",
             },
           ],
           internalType: "struct Raffle.Purchase[]",
@@ -75,6 +95,16 @@ export const RaffleMeta = {
       name: "getRaffle",
       outputs: [
         {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+        {
           internalType: "uint256",
           name: "",
           type: "uint256",
@@ -84,6 +114,73 @@ export const RaffleMeta = {
           name: "",
           type: "uint256",
         },
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+        {
+          internalType: "uint16",
+          name: "",
+          type: "uint16",
+        },
+        {
+          internalType: "uint32",
+          name: "",
+          type: "uint32",
+        },
+        {
+          internalType: "uint8",
+          name: "",
+          type: "uint8",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "getSoldTicketsNum",
+      outputs: [
+        {
+          internalType: "uint16",
+          name: "",
+          type: "uint16",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "nftContract",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "nftTokenId",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "nftTokenType",
+      outputs: [
         {
           internalType: "uint256",
           name: "",
@@ -128,6 +225,19 @@ export const RaffleMeta = {
       type: "function",
     },
     {
+      inputs: [],
+      name: "owner",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
       inputs: [
         {
           internalType: "address",
@@ -140,14 +250,53 @@ export const RaffleMeta = {
           type: "uint256",
         },
         {
-          internalType: "uint256",
+          internalType: "uint16",
           name: "tickets",
-          type: "uint256",
+          type: "uint16",
         },
       ],
       name: "purchaseTickets",
       outputs: [],
       stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "ticketCap",
+      outputs: [
+        {
+          internalType: "uint16",
+          name: "",
+          type: "uint16",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "ticketPrice",
+      outputs: [
+        {
+          internalType: "uint32",
+          name: "",
+          type: "uint32",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "ticketPricePointer",
+      outputs: [
+        {
+          internalType: "uint8",
+          name: "",
+          type: "uint8",
+        },
+      ],
+      stateMutability: "view",
       type: "function",
     },
   ],

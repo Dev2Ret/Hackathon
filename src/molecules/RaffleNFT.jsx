@@ -3,6 +3,8 @@ import styled from "styled-components";
 import { Row, Col, Button, Image } from "react-bootstrap";
 import { Alchemy, Network } from "alchemy-sdk";
 import { useAccountsValueContext } from "@contexts/AccountsContext";
+import { RaffleManagerMeta } from "@eth/contracts/RaffleManagerMeta";
+import { Contract } from "@eth/Web3";
 
 const selectedImageStyle = {
   width: "240px",
@@ -45,7 +47,7 @@ export default function RaffleNFT({
   const accounts = useAccountsValueContext();
 
   const settings = {
-    apiKey: process.env.REACT_APP_ALCHEMY_GOERLI_API_KEY,
+    apiKey: process.env.REACT_APP_ALCHEMY_API_KEY,
     // network: Network.ETH_MAINNET,
     network: Network.ETH_GOERLI,
   };
@@ -59,14 +61,32 @@ export default function RaffleNFT({
         setIsLoading(true);
         setIsError(false);
         try {
-          // Get all NFTs
+          // Get all NFTs by account
           const nfts = await alchemy.nft.getNftsForOwner(accounts[0]);
           // Parse output
           // const numNfts = nfts["totalCount"];
           // const nftList = nfts["ownedNfts"];
-          console.log("rrrrrrrrrrrrr2222", nfts);
+        
+          const listedNfts = await Contract(RaffleManagerMeta)
+            .methods.getRaffleNFTsByOwner(accounts[0])
+            .call();
 
-          setNfts(nfts["ownedNfts"]);
+          // const unlistedNfts = nfts["ownedNfts"];
+          const unlistedNfts = nfts["ownedNfts"].filter((nft) => {
+            for(let listedNft of listedNfts) {
+              if (
+                nft.tokenId.localeCompare(listedNft.tokenId) === 0 &&
+                nft.contract.address
+                  .toLowerCase()
+                  .localeCompare(listedNft.contractAddress.toLowerCase()) === 0
+              ) {
+                return false;
+              }
+            }
+            return true;
+          })
+
+          setNfts(unlistedNfts);
 
           setIsLoading(false);
         } catch {
@@ -86,12 +106,17 @@ export default function RaffleNFT({
     return <p>Error!!</p>;
   }
 
+  if(nfts.length < 1) {
+    return <p>래플에 등록가능한 소유중인 NFT가 없습니다.</p>
+  }
+
   return (
     <>
       <h3>Raffle NFT</h3>
 
       <Row className="justify-content-md-center">
         <Col md="auto">
+          {/* {nfts.filter((unfilteredNft) => !unfilteredNft['listed']).map((nft) => { */}
           <Row className="justify-content-md-center">
             {nfts.map((nft) => {
               let imageStyle = unselectedImageStyle;
@@ -126,28 +151,6 @@ export default function RaffleNFT({
               );
             })}
 
-            {/* {myNFTs.map(({ id, name }) => {
-              let imageStyle = unselectedImageStyle;
-              if (selectedNFT !== undefined && selectedNFT.id === id) {
-                imageStyle = selectedImageStyle;
-              }
-
-              return (
-                <Col style={NFTWrapper} kye={id}>
-                  <MyNFT
-                    onClick={() => {
-                      setSelectedNFT({ id: id, name: name });
-                    }}
-                  >
-                    <Image
-                      style={imageStyle}
-                      src="http://localhost:3000/static/media/Logo.0f193fad515c0d2463ac44ec95490c0f.svg"
-                    />
-                    <NFTName>{name}</NFTName>
-                  </MyNFT>
-                </Col>
-              );
-            })} */}
           </Row>
         </Col>
       </Row>

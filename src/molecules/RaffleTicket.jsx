@@ -37,8 +37,12 @@ export default function RaffleTicket({
   }
 
   function checkTicketPrice(value) {
+    let temp = Math.pow(10, 4) * value;
+
     if (value < 0) {
       setTicketPrice(0);
+    } else if (temp - Math.floor(temp) > 0) {
+      setTicketPrice((value * 10).toFixed(4));
     } else {
       setTicketPrice(value);
     }
