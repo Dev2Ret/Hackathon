@@ -22,7 +22,7 @@ export default function RaffleTime({
 
   return (
     <>
-      <h3>Raffle Time</h3>
+      <h3>래플 종료 시각</h3>
       <DatetimeWrapper>
         <Datetime
           initialValue={initDate}

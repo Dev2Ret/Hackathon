@@ -13,6 +13,7 @@ import styled from "styled-components";
 import { useAccountsValueContext } from "@contexts/AccountsContext";
 import { Contract } from "@eth/Web3";
 import { RaffleMeta } from "@eth/contracts/RaffleMeta";
+import { fetchMetadata } from "@services/nft-metadata-fetcher";
 
 const raffleContainer = {
   margin: "10px 0",
@@ -49,9 +50,12 @@ const contentItemStyle = {
 const contentTitleStyle = {
   "font-size": "small",
 };
-
+  
 const leftItemStyle = {
   padding: "8px",
+  display: "flex",
+  "justify-content": "center",
+  "align-items": "center"
 };
 
 const rightItemStyle = {
@@ -69,7 +73,6 @@ const containerWrapper = {
 
 const imageStyle = {
   width: "100%",
-  height: "100%",
   "object-fit": "fill",
 };
 
@@ -175,6 +178,18 @@ export default function RaffleDetail() {
 
         console.log("ppp", purchases);
 
+        // const result = await fetch(
+        //   "https://gateway.ipfs.io/ipfs/" + results[6].split("//")[1]
+        // );
+        // const image = (await result.json()).image;
+        // // image.split("//");
+
+        // const src = await fetch(
+        //   "https://gateway.ipfs.io/ipfs/" + image.split("//")[1]
+        // );
+
+        // console.log("sssss", src.url);
+
         const raffle = {
           owner: results[0],
           nftContractAddress: results[1],
@@ -187,6 +202,7 @@ export default function RaffleDetail() {
           ticketCap: parseInt(results[8]),
           ticketPrice: parseInt(results[9]),
           ticketPricePointer: parseInt(results[10]),
+          nftMeta: await fetchMetadata(results[6]),
         };
 
         let total = 0;
@@ -198,50 +214,6 @@ export default function RaffleDetail() {
         setRaffle(raffle);
         setPurchases(purchases);
 
-
-
-
-
-
-        // const tokenURIABI = [
-        //   {
-        //     inputs: [
-        //       {
-        //         internalType: "uint256",
-        //         name: "tokenId",
-        //         type: "uint256",
-        //       },
-        //     ],
-        //     name: "tokenURI",
-        //     outputs: [
-        //       {
-        //         internalType: "string",
-        //         name: "",
-        //         type: "string",
-        //       },
-        //     ],
-        //     stateMutability: "view",
-        //     type: "function",
-        //   },
-        // ];
-
-        // const tokenContract = results[1];
-        // const tokenId = parseInt(results[2]); // A token we'd like to retrieve its metadata of
-
-        // const nftMeta = {
-        //   address: tokenContract,
-        //   abi: tokenURIABI
-        // }
-        // const contract = Contract(nftMeta);
-
-        // async function getNFTMetadata() {
-        //   const result = await contract.methods.tokenURI(tokenId).call();
-        //   // const result = await contract.methods.ownerOf(tokenId).call();
-
-        //   console.log("nft result ", result); // ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/101
-        // }
-
-        // getNFTMetadata();
 
 
         setIsLoading(false);
@@ -269,34 +241,11 @@ export default function RaffleDetail() {
         <p>{raffle.nft.chain.symbol}</p> */}
         <Row className="justify-content-md-center" style={raffleContainer}>
           <Col sm={4} style={leftItemStyle} className="bg-secondary">
-            <Image
-              style={imageStyle}
-              src="http://localhost:3000/static/media/Logo.0f193fad515c0d2463ac44ec95490c0f.svg"
-            />
+            <Image style={imageStyle} src={raffle.nftMeta.image} />
           </Col>
           <Col sm={4} style={rightItemStyle} className="bg-secondary">
             <Stack style={contentsContainer}>
-              {/* <RaffleContentsHeader>{raffle.nftName}</RaffleContentsHeader>
-              <RaffleContentsBody>
-                <TimeContainer>
-                  남은 시간 : {findTimeDiffInDays(timeDiff)}일{" "}
-                  {findTimeDiffInHours(timeDiff)}시{" "}
-                  {findTimeDiffInMins(timeDiff)}분{" "}
-                  {findTimeDiffInSecs(timeDiff)}초{" "}
-                </TimeContainer>
-                <TicketsContainer>
-                  남은 티켓 수량 : {raffle.ticketCap}
-                </TicketsContainer>
-                <TicketPriceContainer>
-                  티켓 가격 :{" "}
-                  {raffle.ticketPrice / Math.pow(10, raffle.ticketPricePointer)}
-                </TicketPriceContainer>
-                <ContractAddressContainer>
-                  컨트랙트 주소 : {raffle.nftContractAddress}
-                </ContractAddressContainer>
-              </RaffleContentsBody> */}
-
-              <NFTName>{`${raffle.nftName} #${raffle.nftTokenId}`}</NFTName>
+              <NFTName>{`${raffle.nftMeta.name}`}</NFTName>
               <Stack gap={2}>
                 <ContentItem className="bg-light border">
                   <Row>
@@ -311,16 +260,7 @@ export default function RaffleDetail() {
                     </Col>
                   </Row>
                 </ContentItem>
-                <ContentItem className="bg-light border">
-                  <Row>
-                    <Col sm={4} style={contentTitleStyle}>
-                      티켓 현황
-                    </Col>
-                    <Col sm={8} style={contentItemStyle}>
-                      {`${soldTicketsNum}/${raffle.ticketCap}`}{" "}
-                    </Col>
-                  </Row>
-                </ContentItem>
+
                 <ContentItem className="bg-light border">
                   <Row>
                     <Col sm={4} style={contentTitleStyle}>
@@ -333,6 +273,18 @@ export default function RaffleDetail() {
                     </Col>
                   </Row>
                 </ContentItem>
+
+                <ContentItem className="bg-light border">
+                  <Row>
+                    <Col sm={4} style={contentTitleStyle}>
+                      티켓 현황
+                    </Col>
+                    <Col sm={8} style={contentItemStyle}>
+                      {`${soldTicketsNum}/${raffle.ticketCap}`}{" "}
+                    </Col>
+                  </Row>
+                </ContentItem>
+
                 <ContentItem className="bg-light border">
                   <Row>
                     <Col sm={4} style={contentTitleStyle}>

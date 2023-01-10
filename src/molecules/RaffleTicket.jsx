@@ -50,7 +50,7 @@ export default function RaffleTicket({
 
   return (
     <>
-      <h3>Raffle Ticket</h3>
+      <h3>래플 티켓</h3>
 
       <Form style={formGroupContainer}>
         <Form.Group controlId="totalTicketNum">

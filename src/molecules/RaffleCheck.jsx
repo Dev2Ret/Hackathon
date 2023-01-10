@@ -5,6 +5,8 @@ import styled from "styled-components";
 import { Contract } from "@eth/Web3";
 import { RaffleManagerMeta } from "src/eth/contracts/RaffleManagerMeta";
 import { useState } from "react";
+import { fetchMetadata } from "@services/nft-metadata-fetcher";
+import { useEffect } from "react";
 
 const raffleContainer = {
   margin: "10px 0",
@@ -71,6 +73,15 @@ export default function RaffleCheck({
 }) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [imageSrc, setImageSrc] = useState();
+
+  useEffect(() => {
+    async function fetchAndsetImage() {
+      const nftMeta = await fetchMetadata(selectedNFT.tokenUri.raw);
+      setImageSrc(nftMeta.image);
+    }
+    fetchAndsetImage();
+  }, []);
 
   let dt = new Date(endTimestamp);
   let stringDt =
@@ -140,53 +151,24 @@ export default function RaffleCheck({
     // });
   }
 
-  // function createRaffle() {
-  //   let ticketPricePointer = 0;
-  //   let ticketPriceInteger = ticketPrice;
-
-  //   while (Math.floor(ticketPriceInteger) !== ticketPriceInteger) {
-  //     ticketPricePointer += 1;
-  //     ticketPriceInteger *= 10;
-  //   }
-
-  //   Contract(RaffleManagerMeta)
-  //     .methods.createRaffle(
-  //       accounts[0],
-  //       selectedNFT.contract.address,
-  //       selectedNFT.tokenId,
-  //       parseNFTTokenTypeToInt(selectedNFT.tokenType),
-  //       endTimestamp / 1000,
-  //       totalTicketNum,
-  //       ticketPriceInteger,
-  //       ticketPricePointer
-  //     )
-  //     .send({ from: accounts[0] })
-  //     .then((receipt) => {
-  //       navigate(
-  //         `/raffles/eth/` +
-  //           receipt.events.NFTRaffleCreated.returnValues.raffleAddress
-  //       );
-  //     });
-  // }
-
   return (
     <>
-      <h3>Raffle Check</h3>
-      { isLoading ? (
-          <Spinner animation="border" role="status" style={spinnerStyle}>
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
-        ) : null
-      }
+      <h3>래플 확인</h3>
+      {isLoading ? (
+        <Spinner animation="border" role="status" style={spinnerStyle}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      ) : null}
       <Row className="justify-content-md-center" style={raffleContainer}>
         <Col style={imageWrapper} lg="2">
           <Image
             style={imageStyle}
-            src="http://localhost:3000/static/media/Logo.0f193fad515c0d2463ac44ec95490c0f.svg"
+            src={imageSrc}
+            // src="http://localhost:3000/static/media/Logo.0f193fad515c0d2463ac44ec95490c0f.svg"
           />
         </Col>
         <Col style={contentsContainer} lg="2">
-          <NFTName>{selectedNFT.name}</NFTName>
+          <NFTName>{`${selectedNFT.title}`}</NFTName>
           <Stack gap={4}>
             <ContentItem className="bg-light border">
               <Row>
@@ -237,7 +219,7 @@ export default function RaffleCheck({
           <Button
             style={fullyWidenStyle}
             variant="primary"
-            // disabled={selectedNFT === undefined}
+            disabled={isLoading}
             onClick={toRaffleTicket}
           >
             이전
@@ -247,7 +229,7 @@ export default function RaffleCheck({
           <Button
             style={fullyWidenStyle}
             variant="primary"
-            // disabled={selectedNFT === undefined}
+            disabled={isLoading}
             onClick={createRaffle}
           >
             완료
