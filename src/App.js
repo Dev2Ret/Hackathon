@@ -3,7 +3,7 @@ import NavbarBr from "./components/NavbarBr";
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import { AccountsProvider } from "@contexts/AccountsContext";
-import Mintcard from "@molecules/Mintcard";
+import NFTCard from "@molecules/NFTCard";
 import Raffles from "@components/Raffles";
 import UploadNFT from "@components/UploadNFT";
 import NotFound from "@components/NotFound";
@@ -16,7 +16,7 @@ function App() {
       <AccountsProvider>
         <NavbarBr />
         <Routes>
-          <Route index element={<Mintcard />}></Route>
+          <Route index element={<Dashboard />}></Route>
           <Route path="raffles" element={<Raffles />}></Route>
           <Route path="raffles/:chain" element={<Raffles />}></Route>
           <Route
