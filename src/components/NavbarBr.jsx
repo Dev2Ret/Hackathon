@@ -21,7 +21,7 @@ export default function NavbarBr() {
           <NavDropdown title="Upload" id="uploadDropdown">
             <Nav.Link as={Link} to={"uploadnft"}>NFTs</Nav.Link>
           </NavDropdown>
-          <Nav.Link as={Link} to={"market"}>Market</Nav.Link>
+          {/* <Nav.Link as={Link} to={"market"}>Market</Nav.Link> */}
         </Nav>
         <OnboardingButton />
       </Container>

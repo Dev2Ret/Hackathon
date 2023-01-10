@@ -61,6 +61,53 @@ export const RaffleMeta = {
       type: "function",
     },
     {
+      inputs: [
+        {
+          internalType: "address",
+          name: "contractAddress",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256",
+        },
+      ],
+      name: "getERC1155Metadata",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "getERC721Metadata",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "",
+          type: "string",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
       inputs: [],
       name: "getPurchases",
       outputs: [
@@ -113,6 +160,21 @@ export const RaffleMeta = {
           internalType: "uint256",
           name: "",
           type: "uint256",
+        },
+        {
+          internalType: "string",
+          name: "",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "",
+          type: "string",
         },
         {
           internalType: "uint256",

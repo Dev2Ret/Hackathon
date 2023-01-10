@@ -1,9 +1,10 @@
 import { React } from "react";
 import { useNavigate } from "react-router-dom";
-import { Row, Col, Button, Image, Stack } from "react-bootstrap";
+import { Row, Col, Button, Image, Stack, Spinner } from "react-bootstrap";
 import styled from "styled-components";
 import { Contract } from "@eth/Web3";
 import { RaffleManagerMeta } from "src/eth/contracts/RaffleManagerMeta";
+import { useState } from "react";
 
 const raffleContainer = {
   margin: "10px 0",
@@ -41,6 +42,11 @@ const contentTitleStyle = {
   "font-size": "small"
 }
 
+const spinnerStyle = {
+  "position": "absolute",
+  "top": "350px"
+}
+
 const NFTName = styled.h4`
   margin-bottom: 24px;
   padding: 8px;
@@ -64,6 +70,7 @@ export default function RaffleCheck({
   accounts,
 }) {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   let dt = new Date(endTimestamp);
   let stringDt =
@@ -78,54 +85,52 @@ export default function RaffleCheck({
     dt.getMinutes() +
     "분";
 
-  let ticketPricePointer = 0;
-  let ticketPriceInteger = ticketPrice;
-
-  while (Math.floor(ticketPriceInteger) !== ticketPriceInteger) {
-    ticketPricePointer += 1;
-    ticketPriceInteger *= 10;
-  }
-
-  console.log(
-    ticketPriceInteger,
-    ticketPricePointer,
-    ticketPriceInteger / Math.pow(10, ticketPricePointer)
-  );
-
   function parseNFTTokenTypeToInt(tokenType) {
     if(tokenType === "ERC721") return 721;
-    else if(tokenType === "ERC1155") return 1155;
+    // else if(tokenType === "ERC1155") return 1155;
     else throw new Error("Not NFT token");
   }
 
   async function createRaffle() {
-    let ticketPricePointer = 0;
-    let ticketPriceInteger = ticketPrice;
+    try{
+      setIsLoading(true);
 
-    while (ticketPriceInteger !== Math.floor(ticketPriceInteger)) {
-      ticketPricePointer += 1;
-      ticketPriceInteger = parseFloat((ticketPriceInteger * 10).toFixed(4));
+      console.log("isloading true");
+
+      let ticketPricePointer = 0;
+      let ticketPriceInteger = ticketPrice;
+
+      while (ticketPriceInteger !== Math.floor(ticketPriceInteger)) {
+        ticketPricePointer += 1;
+        ticketPriceInteger = parseFloat((ticketPriceInteger * 10).toFixed(4));
+      }
+
+      const receipt = await Contract(RaffleManagerMeta)
+        .methods.createRaffle(
+          accounts[0],
+          selectedNFT.contract.address,
+          selectedNFT.tokenId,
+          parseNFTTokenTypeToInt(selectedNFT.tokenType),
+          endTimestamp / 1000,
+          totalTicketNum,
+          ticketPriceInteger,
+          ticketPricePointer
+        )
+        .send({ from: accounts[0] });
+
+      console.log("rs : ", receipt);
+
+      setIsLoading(false);
+      console.log("isloading false");
+
+      navigate(
+        `/raffles/eth/` +
+          receipt.events.NFTRaffleCreated.returnValues.raffleAddress
+      );
+    } catch(e) {
+      setIsLoading(false);
+      console.log("isloading false");
     }
-
-    const receipt = await Contract(RaffleManagerMeta)
-      .methods.createRaffle(
-        accounts[0],
-        selectedNFT.contract.address,
-        selectedNFT.tokenId,
-        parseNFTTokenTypeToInt(selectedNFT.tokenType),
-        endTimestamp / 1000,
-        totalTicketNum,
-        ticketPriceInteger,
-        ticketPricePointer
-      )
-      .send({ from: accounts[0] });
-
-    console.log("rs : ", receipt);
-
-    navigate(
-      `/raffles/eth/` +
-        receipt.events.NFTRaffleCreated.returnValues.raffleAddress
-    );
 
     // .then((receipt) => {
     //   navigate(
@@ -167,7 +172,12 @@ export default function RaffleCheck({
   return (
     <>
       <h3>Raffle Check</h3>
-
+      { isLoading ? (
+          <Spinner animation="border" role="status" style={spinnerStyle}>
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        ) : null
+      }
       <Row className="justify-content-md-center" style={raffleContainer}>
         <Col style={imageWrapper} lg="2">
           <Image

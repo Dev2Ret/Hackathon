@@ -20,7 +20,7 @@ function App() {
           <Route path="raffles" element={<Raffles />}></Route>
           <Route path="raffles/:chain" element={<Raffles />}></Route>
           <Route
-            path="raffles/:chain/:contractId"
+            path="raffles/:chain/:contractAddress"
             element={<RaffleDetail />}
           ></Route>
           <Route path="uploadnft" element={<UploadNFT />}></Route>

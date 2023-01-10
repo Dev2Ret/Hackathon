@@ -26,9 +26,14 @@ const contentBoxStyle = {
   // marginTop: "10px",
 };
 
+const cardTextRightItemStyle = {
+  "text-align": "right"
+}
+
 export default function Raffles() {
   const navigate = useNavigate();
   const params = useParams();
+  const [timeDiffs, setTimeDiffs] = useState([]);
 
   const chains = [
     { id: 1, symbol: "eth", name: "Ethereum", icon: <EthereumIcon /> },
@@ -39,7 +44,6 @@ export default function Raffles() {
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
   const [chain, setChain] = useState();
-  // const [raffleAddrs, setRaffleAddrs] = useState([]);
   const accounts = useAccountsValueContext();
 
   let index = 0;
@@ -50,29 +54,12 @@ export default function Raffles() {
     setIsLoading(true);
     setIsError(false);
     try {
-      // const m = {
-      //   address: "0xf06b2B94e4572B94D7d7bd7C2F231fA2E8e9ca97",
-      //   abi: RaffleMeta.abi,
-      // };
-      // const r = await Contract(m).methods.getRaffle().call()
-
-      // console.log("rrr ", r);
-
       const results = await Contract(RaffleManagerMeta)
         .methods.getRafflesByIndex(index, 10)
         .call();
 
-      console.log(results);
-
-      // console.log("rrr : ", results);
+      console.log("r1 ", results);
       
-      // // setRaffles("rrrr : ", results);
-
-      // index += results.length;
-
-      
-
-      // const results = await axios("http://localhost:3000/api/raffles/");
       setRaffles(results);
       setIsLoading(false);
     } catch(e) {
@@ -139,6 +126,22 @@ export default function Raffles() {
     return <p>Error!!</p>;
   }
 
+  function formatTimestamp(timestamp) {
+    let dt = new Date(timestamp);
+    return (
+      dt.getFullYear() +
+      "년 " +
+      (dt.getMonth() + 1) +
+      "월 " +
+      dt.getDate() +
+      "일 " +
+      dt.getHours() +
+      "시 " +
+      dt.getMinutes() +
+      "분"
+    );
+  }
+
   function calculateTicketPrice(price, pointer) {
     return parseInt(price) / Math.pow(10, parseInt(pointer));
   }
@@ -194,16 +197,30 @@ export default function Raffles() {
                   />
                   <Card.Body className="bg-secondary">
                     {/* <Card.Title>{raffle.nft.name}</Card.Title> */}
-                    <Card.Title>Unnamed</Card.Title>
+                    <Card.Title>{`${raffle.nftName} #${raffle.nftTokenId}`}</Card.Title>
                     <Card.Text>
-                      티켓 가격:{" "}
-                      {calculateTicketPrice(
-                        raffle.ticketPrice,
-                        raffle.ticketPricePointer
-                      )}{" "}
-                      <br />
-                      티켓 현황: {`${raffle.soldTickets}/${raffle.ticketCap}`}{" "}
-                      <br />
+                      <Row>
+                        <Col>종료 시각</Col>
+                        <Col style={cardTextRightItemStyle}>
+                          {formatTimestamp(parseInt(raffle.expiredAt) * 1000)}
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>티켓 가격</Col>
+                        <Col style={cardTextRightItemStyle}>
+                          {calculateTicketPrice(
+                            raffle.ticketPrice,
+                            raffle.ticketPricePointer
+                          )}{" "}
+                          ETH
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>티켓 현황</Col>
+                        <Col
+                          style={cardTextRightItemStyle}
+                        >{`${raffle.soldTickets}/${raffle.ticketCap}`}</Col>
+                      </Row>
                     </Card.Text>
                     <div className="d-grid gap-2">
                       <Button

@@ -1,5 +1,5 @@
 export const RaffleManagerMeta = {
-  address: "0x8814660C9526f4DC6b10CBb006B8CB17D2770aD5",
+  address: "0x79861C00Cc2BD3626edC6343032bc2b7dE14a932",
   abi: [
     {
       inputs: [],
@@ -174,6 +174,21 @@ export const RaffleManagerMeta = {
               type: "uint256",
             },
             {
+              internalType: "string",
+              name: "nftName",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "nftSymbol",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "nftTokenURI",
+              type: "string",
+            },
+            {
               internalType: "uint256",
               name: "expiredAt",
               type: "uint256",
@@ -297,6 +312,21 @@ export const RaffleManagerMeta = {
               internalType: "uint256",
               name: "nftTokenType",
               type: "uint256",
+            },
+            {
+              internalType: "string",
+              name: "nftName",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "nftSymbol",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "nftTokenURI",
+              type: "string",
             },
             {
               internalType: "uint256",
