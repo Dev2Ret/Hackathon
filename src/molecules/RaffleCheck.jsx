@@ -30,7 +30,7 @@ const contentsContainer = {
 const imageStyle = {
   width: "100%",
   height: "100%",
-  "object-fit": "fill",
+  "object-fit": "contain",
 };
 
 const contentItemStyle = {

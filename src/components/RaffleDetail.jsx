@@ -8,6 +8,9 @@ import {
   Image,
   Button,
   Stack,
+  Spinner,
+  InputGroup,
+  Form
 } from "react-bootstrap";
 import styled from "styled-components";
 import { useAccountsValueContext } from "@contexts/AccountsContext";
@@ -25,20 +28,6 @@ const imageWrapper = {
   height: "422px",
   // border: "1px solid black",
 };
-
-// const contentsContainer = {
-//   width: "422px",
-//   height: "422px",
-//   // border: "1px solid blue",
-//   padding: "12px",
-//   "text-align": "left",
-// };
-
-// const imageStyle = {
-//   width: "100%",
-//   height: "100%",
-//   "object-fit": "fill",
-// };
 
 const contentItemStyle = {
   "white-space": "nowrap",
@@ -88,6 +77,9 @@ const RaffleContentsBody = styled.div`
 
 const RaffleContentsFooter = styled.div`
   padding: 8px;
+  border: 1.4px solid #979797;
+  border-style: dashed;
+  margin-top: 8px;
 `;
 
 const ContentItem = styled.div`
@@ -110,16 +102,31 @@ const NFTName = styled.h4`
   overflow: hidden;
 `;
 
+const inputGroupTextStyle = {
+  "font-size": "small"
+}
+
+const fromControlStyle = {
+  "width": "120px"
+}
+
+const costBoxStyle = {
+  "display": "flex",
+  "align-items": "center"
+}
+
 export default function RaffleDetail() {
 
   const accounts = useAccountsValueContext();
   const [raffle, setRaffle] = useState();
   const [purchases, setPurchases] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [soldTicketsNum, setSoldTicketsNum] = useState(0);
   const [isError, setIsError] = useState(false);
   const [timeDiff, setTimeDiff] = useState(0);
-
+  const [tickets, setTickets] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  
   const params = useParams();
 
   useEffect(() => {
@@ -159,75 +166,117 @@ export default function RaffleDetail() {
     return parseInt(timeDiffSecs / 60 / 60 / 24);
   }
 
-  useEffect(() => {
-    async function fetchRaffle() {
-      setIsLoading(true);
-      setIsError(false);
-      try {
+  async function fetchRaffle() {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const raffleMeta = {
+        address: params.contractAddress,
+        abi: RaffleMeta.abi,
+      };
 
-        const raffleMeta = {
-          address: params.contractAddress,
-          abi: RaffleMeta.abi
-        };
+      const results = await Contract(raffleMeta).methods.getRaffle().call();
 
-        const results = await Contract(raffleMeta).methods.getRaffle().call();
+      console.log(results);
 
-        console.log(results);
+      const purchases = await Contract(raffleMeta)
+        .methods.getPurchases()
+        .call();
 
-        const purchases = await Contract(raffleMeta).methods.getPurchases().call();
+      const raffle = {
+        owner: results[0],
+        nftContractAddress: results[1],
+        nftTokenId: parseInt(results[2]),
+        nftTokenType: parseInt(results[3]),
+        nftName: results[4],
+        nftSymbol: results[5],
+        nftTokenURI: results[6],
+        expiredAt: parseInt(results[7]),
+        ticketCap: parseInt(results[8]),
+        ticketPrice: parseInt(results[9]),
+        ticketPricePointer: parseInt(results[10]),
+        nftMeta: await fetchMetadata(results[6]),
+      };
 
-        console.log("ppp", purchases);
-
-        // const result = await fetch(
-        //   "https://gateway.ipfs.io/ipfs/" + results[6].split("//")[1]
-        // );
-        // const image = (await result.json()).image;
-        // // image.split("//");
-
-        // const src = await fetch(
-        //   "https://gateway.ipfs.io/ipfs/" + image.split("//")[1]
-        // );
-
-        // console.log("sssss", src.url);
-
-        const raffle = {
-          owner: results[0],
-          nftContractAddress: results[1],
-          nftTokenId: parseInt(results[2]),
-          nftTokenType: parseInt(results[3]),
-          nftName: results[4],
-          nftSymbol: results[5],
-          nftTokenURI: results[6],
-          expiredAt: parseInt(results[7]),
-          ticketCap: parseInt(results[8]),
-          ticketPrice: parseInt(results[9]),
-          ticketPricePointer: parseInt(results[10]),
-          nftMeta: await fetchMetadata(results[6]),
-        };
-
-        let total = 0;
-        for(let i=0; i<purchases.length; i++) {
-          total += parseInt(purchases[i].tickets);
-        }
-
-        setSoldTicketsNum(total);
-        setRaffle(raffle);
-        setPurchases(purchases);
-
-
-
-        setIsLoading(false);
-      } catch(e) {
-        console.log(e)
-        setIsError(true);
-        setIsLoading(false);
+      console.log("pppp", purchases);
+      let total = 0;
+      for (let i = 0; i < purchases.length; i++) {
+        total += parseInt(purchases[i].tickets);
       }
+
+      setSoldTicketsNum(total);
+      setRaffle(raffle);
+      setPurchases(purchases);
+
+      setIsLoading(false);
+    } catch (e) {
+      console.log(e);
+      setIsError(true);
+      setIsLoading(false);
     }
+  }
+
+  useEffect(() => {
     fetchRaffle();
   }, []);
 
+  function calculateCost() {
+    const cost =
+      tickets * (raffle.ticketPrice / Math.pow(10, raffle.ticketPricePointer));
+    return isNaN(cost) ? 0 : parseFloat(cost.toFixed(4));
+  }
+
+  function handleTicketChange(e) {
+    const value = parseInt(e.target.value);
+    if (value <= raffle.ticketCap - soldTicketsNum) {
+      setTickets(parseInt(e.target.value));
+    }
+  }
+
+  async function purchaseTickets() {
+    if(tickets < 1) return;
+
+    try {
+      setIsPurchasing(true);
+
+      const raffleMeta = {
+        address: params.contractAddress,
+        abi: RaffleMeta.abi,
+      };
+
+      const receipt = await Contract(raffleMeta)
+        .methods.purchaseTickets(
+          accounts[0],
+          Math.floor(new Date().getTime() / 1000),
+          tickets
+        )
+        .send({ from: accounts[0] });
+
+      console.log("rs : ", receipt);
+
+      setIsPurchasing(false);
+
+      fetchRaffle();
+
+    } catch (e) {
+      setIsPurchasing(false);
+      console.log("purchase tickets error", e);
+    }
+
+    // .then((receipt) => {
+    //   navigate(
+    //     `/raffles/eth/` +
+    //       receipt.events.NFTRaffleCreated.returnValues.raffleAddress
+    //   );
+    // });
+  }
+
   if (isLoading) {
-    return (<p>Loading..</p>);
+    return (
+      <Container fluid="md" style={containerWrapper}>
+        <Spinner />
+      </Container>
+    );
   }
 
   if (isError) {
@@ -309,13 +358,46 @@ export default function RaffleDetail() {
               </Stack>
 
               <RaffleContentsFooter className="d-grid gap-2">
+                <Row>
+                  <Col>
+                    <InputGroup>
+                      <InputGroup.Text
+                        style={inputGroupTextStyle}
+                        id="basic-addon1"
+                      >
+                        티켓
+                      </InputGroup.Text>
+                      <Form.Control
+                        type="number"
+                        aria-label="Tickets"
+                        aria-describedby="basic-addon1"
+                        min={0}
+                        max={raffle.ticketCap - soldTicketsNum}
+                        value={tickets}
+                        disabled={isPurchasing}
+                        onChange={handleTicketChange}
+                      />
+                    </InputGroup>
+                  </Col>
+                  <Col style={costBoxStyle}>= {calculateCost()} ETH</Col>
+                </Row>
+
                 <Button
                   variant="primary"
-                  onClick={() => {
-                    // parseLeftTime(raffle.ended);
-                  }}
+                  disabled={isPurchasing}
+                  onClick={purchaseTickets}
                 >
-                  참여하기
+                  {isPurchasing ? (
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <>티켓 구매하기</>
+                  )}
                 </Button>
               </RaffleContentsFooter>
             </Stack>

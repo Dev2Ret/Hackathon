@@ -1,6 +1,6 @@
 import { React, useState, useEffect } from "react";
 import styled from "styled-components";
-import { Row, Col, Button, Image } from "react-bootstrap";
+import { Row, Col, Button, Image, Spinner } from "react-bootstrap";
 import { Alchemy, Network } from "alchemy-sdk";
 import { useAccountsValueContext } from "@contexts/AccountsContext";
 import { RaffleManagerMeta } from "@eth/contracts/RaffleManagerMeta";
@@ -110,7 +110,7 @@ export default function RaffleNFT({
   }, [accounts]);
 
   if (isLoading) {
-    return <p>Loading..</p>;
+    return <Spinner />;
   }
 
   if (isError) {

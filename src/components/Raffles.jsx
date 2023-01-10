@@ -8,6 +8,7 @@ import {
   Card,
   ToggleButton,
   Stack,
+  Spinner,
 } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 import EthereumIcon from "@assets/EthereumIcon";
@@ -158,7 +159,11 @@ export default function Raffles() {
   };
 
   if (isLoading) {
-    return <p>Loading..</p>;
+    return (
+      <Container style={contentBoxStyle}>
+        <Spinner />
+      </Container>
+    );
   }
 
   if (isError) {
@@ -273,7 +278,7 @@ export default function Raffles() {
                           );
                         }}
                       >
-                        보러가기
+                        참가하기
                       </Button>
                     </div>
                   </Card.Body>
