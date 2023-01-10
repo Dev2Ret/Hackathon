@@ -25,13 +25,27 @@ export default function RaffleTicket({
 }) {
 
   function checkTotalTicketNum(value) {
-    // TODO check whether input is valid or not
-    setTotalTicketNum(value);
+    if(value < 0) {
+      setTotalTicketNum(0);
+    } else if(value > 1000) {
+      setTotalTicketNum(1000);
+    } else if(!Number.isInteger(value)){
+      setTotalTicketNum(parseInt(value));
+    } else {
+      setTotalTicketNum(value);
+    }
   }
 
   function checkTicketPrice(value) {
-    // TODO check whether input is valid or not
-    setTicketPrice(value);
+    let temp = Math.pow(10, 4) * value;
+
+    if (value < 0) {
+      setTicketPrice(0);
+    } else if (temp - Math.floor(temp) > 0) {
+      setTicketPrice((value * 10).toFixed(4));
+    } else {
+      setTicketPrice(value);
+    }
   }
 
   return (
@@ -51,7 +65,7 @@ export default function RaffleTicket({
           />
         </Form.Group>
         <Form.Group controlId="ticketPrice">
-          <Form.Label style={formLabelStyle}>티켓 가격</Form.Label>
+          <Form.Label style={formLabelStyle}>티켓 가격 (ETH)</Form.Label>
           <Form.Control
             style={formControlStyle}
             type="number"

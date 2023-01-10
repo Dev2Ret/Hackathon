@@ -1,33 +1,269 @@
 export const RaffleManagerMeta = {
-  address: "0x6355f6638e4a005c3bf94f1d0ffe7161072950bd",
+  address: "0x79861C00Cc2BD3626edC6343032bc2b7dE14a932",
   abi: [
     {
-      inputs: [{ internalType: "uint256", name: "value", type: "uint256" }],
-      name: "createAnotherContract",
-      outputs: [{ internalType: "address", name: "", type: "address" }],
+      inputs: [],
+      stateMutability: "nonpayable",
+      type: "constructor",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: "address",
+          name: "raffleOwner",
+          type: "address",
+        },
+        {
+          indexed: false,
+          internalType: "address",
+          name: "nftContract",
+          type: "address",
+        },
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "nftTokenId",
+          type: "uint256",
+        },
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "nftTokenType",
+          type: "uint256",
+        },
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "expiredAt",
+          type: "uint256",
+        },
+        {
+          indexed: false,
+          internalType: "uint16",
+          name: "ticketCap",
+          type: "uint16",
+        },
+        {
+          indexed: false,
+          internalType: "uint32",
+          name: "ticketPrice",
+          type: "uint32",
+        },
+        {
+          indexed: false,
+          internalType: "uint8",
+          name: "ticketPricePointer",
+          type: "uint8",
+        },
+        {
+          indexed: false,
+          internalType: "address",
+          name: "raffleAddress",
+          type: "address",
+        },
+      ],
+      name: "NFTRaffleCreated",
+      type: "event",
+    },
+    {
+      inputs: [],
+      name: "checkExpiredRaffles",
+      outputs: [],
       stateMutability: "nonpayable",
       type: "function",
     },
     {
       inputs: [],
-      name: "showAll",
-      outputs: [{ internalType: "uint256[]", name: "", type: "uint256[]" }],
-      stateMutability: "view",
+      name: "closeRaffle",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "raffleOwner",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "nftContract",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "nftTokenId",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "nftTokenType",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "expiredAt",
+          type: "uint256",
+        },
+        {
+          internalType: "uint16",
+          name: "ticketCap",
+          type: "uint16",
+        },
+        {
+          internalType: "uint32",
+          name: "ticketPrice",
+          type: "uint32",
+        },
+        {
+          internalType: "uint8",
+          name: "ticketPricePointer",
+          type: "uint8",
+        },
+      ],
+      name: "createRaffle",
+      outputs: [],
+      stateMutability: "nonpayable",
       type: "function",
     },
     {
       inputs: [],
-      name: "showAllAddrs",
-      outputs: [{ internalType: "address[]", name: "", type: "address[]" }],
-      stateMutability: "view",
+      name: "deleteRaffle",
+      outputs: [],
+      stateMutability: "nonpayable",
       type: "function",
     },
     {
-      inputs: [],
-      name: "showAllContracts",
+      inputs: [
+        {
+          internalType: "address",
+          name: "raffleOwner",
+          type: "address",
+        },
+      ],
+      name: "getRaffleDetailsByOwner",
       outputs: [
         {
-          internalType: "contract AnotherContract[]",
+          components: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "raffleContract",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "nftContract",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "nftTokenId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "nftTokenType",
+              type: "uint256",
+            },
+            {
+              internalType: "string",
+              name: "nftName",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "nftSymbol",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "nftTokenURI",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "expiredAt",
+              type: "uint256",
+            },
+            {
+              internalType: "uint16",
+              name: "ticketCap",
+              type: "uint16",
+            },
+            {
+              internalType: "uint16",
+              name: "soldTickets",
+              type: "uint16",
+            },
+            {
+              internalType: "uint32",
+              name: "ticketPrice",
+              type: "uint32",
+            },
+            {
+              internalType: "uint8",
+              name: "ticketPricePointer",
+              type: "uint8",
+            },
+            {
+              internalType: "uint32",
+              name: "index",
+              type: "uint32",
+            },
+          ],
+          internalType: "struct RaffleManager.RaffleDetail[]",
+          name: "",
+          type: "tuple[]",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "raffleOwner",
+          type: "address",
+        },
+      ],
+      name: "getRaffleNFTsByOwner",
+      outputs: [
+        {
+          components: [
+            {
+              internalType: "address",
+              name: "contractAddress",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "tokenId",
+              type: "uint256",
+            },
+          ],
+          internalType: "struct RaffleManager.SimpleNFT[]",
+          name: "",
+          type: "tuple[]",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "getRaffles",
+      outputs: [
+        {
+          internalType: "contract Raffle[]",
           name: "",
           type: "address[]",
         },
@@ -35,5 +271,101 @@ export const RaffleManagerMeta = {
       stateMutability: "view",
       type: "function",
     },
-  ]
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "index",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "itemNums",
+          type: "uint256",
+        },
+      ],
+      name: "getRafflesByIndex",
+      outputs: [
+        {
+          components: [
+            {
+              internalType: "address",
+              name: "owner",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "raffleContract",
+              type: "address",
+            },
+            {
+              internalType: "address",
+              name: "nftContract",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "nftTokenId",
+              type: "uint256",
+            },
+            {
+              internalType: "uint256",
+              name: "nftTokenType",
+              type: "uint256",
+            },
+            {
+              internalType: "string",
+              name: "nftName",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "nftSymbol",
+              type: "string",
+            },
+            {
+              internalType: "string",
+              name: "nftTokenURI",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "expiredAt",
+              type: "uint256",
+            },
+            {
+              internalType: "uint16",
+              name: "ticketCap",
+              type: "uint16",
+            },
+            {
+              internalType: "uint16",
+              name: "soldTickets",
+              type: "uint16",
+            },
+            {
+              internalType: "uint32",
+              name: "ticketPrice",
+              type: "uint32",
+            },
+            {
+              internalType: "uint8",
+              name: "ticketPricePointer",
+              type: "uint8",
+            },
+            {
+              internalType: "uint32",
+              name: "index",
+              type: "uint32",
+            },
+          ],
+          internalType: "struct RaffleManager.RaffleDetail[]",
+          name: "",
+          type: "tuple[]",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+  ],
 };

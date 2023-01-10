@@ -1,6 +1,10 @@
 import { React } from "react";
-import { Row, Col, Button, Image, Stack } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import { Row, Col, Button, Image, Stack, Spinner } from "react-bootstrap";
 import styled from "styled-components";
+import { Contract } from "@eth/Web3";
+import { RaffleManagerMeta } from "src/eth/contracts/RaffleManagerMeta";
+import { useState } from "react";
 
 const raffleContainer = {
   margin: "10px 0",
@@ -38,6 +42,11 @@ const contentTitleStyle = {
   "font-size": "small"
 }
 
+const spinnerStyle = {
+  "position": "absolute",
+  "top": "350px"
+}
+
 const NFTName = styled.h4`
   margin-bottom: 24px;
   padding: 8px;
@@ -58,21 +67,117 @@ export default function RaffleCheck({
   endTimestamp,
   totalTicketNum,
   ticketPrice,
+  accounts,
 }) {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   let dt = new Date(endTimestamp);
-  let stringDt = (
-    dt.getFullYear() + "년 " + 
-    (dt.getMonth() + 1) + "월 " +
-    (dt.getDate()) + "일 " +
-    (dt.getHours()) + "시 " +
-    (dt.getMinutes()) + "분"
-  );
+  let stringDt =
+    dt.getFullYear() +
+    "년 " +
+    (dt.getMonth() + 1) +
+    "월 " +
+    dt.getDate() +
+    "일 " +
+    dt.getHours() +
+    "시 " +
+    dt.getMinutes() +
+    "분";
+
+  function parseNFTTokenTypeToInt(tokenType) {
+    if(tokenType === "ERC721") return 721;
+    // else if(tokenType === "ERC1155") return 1155;
+    else throw new Error("Not NFT token");
+  }
+
+  async function createRaffle() {
+    try{
+      setIsLoading(true);
+
+      console.log("isloading true");
+
+      let ticketPricePointer = 0;
+      let ticketPriceInteger = ticketPrice;
+
+      while (ticketPriceInteger !== Math.floor(ticketPriceInteger)) {
+        ticketPricePointer += 1;
+        ticketPriceInteger = parseFloat((ticketPriceInteger * 10).toFixed(4));
+      }
+
+      const receipt = await Contract(RaffleManagerMeta)
+        .methods.createRaffle(
+          accounts[0],
+          selectedNFT.contract.address,
+          selectedNFT.tokenId,
+          parseNFTTokenTypeToInt(selectedNFT.tokenType),
+          endTimestamp / 1000,
+          totalTicketNum,
+          ticketPriceInteger,
+          ticketPricePointer
+        )
+        .send({ from: accounts[0] });
+
+      console.log("rs : ", receipt);
+
+      setIsLoading(false);
+      console.log("isloading false");
+
+      navigate(
+        `/raffles/eth/` +
+          receipt.events.NFTRaffleCreated.returnValues.raffleAddress
+      );
+    } catch(e) {
+      setIsLoading(false);
+      console.log("isloading false");
+    }
+
+    // .then((receipt) => {
+    //   navigate(
+    //     `/raffles/eth/` +
+    //       receipt.events.NFTRaffleCreated.returnValues.raffleAddress
+    //   );
+    // });
+  }
+
+  // function createRaffle() {
+  //   let ticketPricePointer = 0;
+  //   let ticketPriceInteger = ticketPrice;
+
+  //   while (Math.floor(ticketPriceInteger) !== ticketPriceInteger) {
+  //     ticketPricePointer += 1;
+  //     ticketPriceInteger *= 10;
+  //   }
+
+  //   Contract(RaffleManagerMeta)
+  //     .methods.createRaffle(
+  //       accounts[0],
+  //       selectedNFT.contract.address,
+  //       selectedNFT.tokenId,
+  //       parseNFTTokenTypeToInt(selectedNFT.tokenType),
+  //       endTimestamp / 1000,
+  //       totalTicketNum,
+  //       ticketPriceInteger,
+  //       ticketPricePointer
+  //     )
+  //     .send({ from: accounts[0] })
+  //     .then((receipt) => {
+  //       navigate(
+  //         `/raffles/eth/` +
+  //           receipt.events.NFTRaffleCreated.returnValues.raffleAddress
+  //       );
+  //     });
+  // }
 
   return (
     <>
       <h3>Raffle Check</h3>
-
+      { isLoading ? (
+          <Spinner animation="border" role="status" style={spinnerStyle}>
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        ) : null
+      }
       <Row className="justify-content-md-center" style={raffleContainer}>
         <Col style={imageWrapper} lg="2">
           <Image
@@ -116,10 +221,10 @@ export default function RaffleCheck({
             <ContentItem className="bg-light border">
               <Row>
                 <Col sm={4} style={contentTitleStyle}>
-                  컨트랙트 주소
+                  NFT 컨트랙트
                 </Col>
                 <Col sm={8} style={contentItemStyle}>
-                  0xabcdef0123456789abcdef0123456789
+                  {selectedNFT.contract.address}
                 </Col>
               </Row>
             </ContentItem>
@@ -143,7 +248,7 @@ export default function RaffleCheck({
             style={fullyWidenStyle}
             variant="primary"
             // disabled={selectedNFT === undefined}
-            onClick={console.log("finish")}
+            onClick={createRaffle}
           >
             완료
           </Button>

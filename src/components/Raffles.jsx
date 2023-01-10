@@ -1,4 +1,4 @@
-import { React, useState, useEffect, useContext } from "react";
+import { React, useState, useEffect } from "react";
 import {
   Container,
   Row,
@@ -26,13 +26,18 @@ const contentBoxStyle = {
   // marginTop: "10px",
 };
 
+const cardTextRightItemStyle = {
+  "text-align": "right"
+}
+
 export default function Raffles() {
   const navigate = useNavigate();
   const params = useParams();
+  const [timeDiffs, setTimeDiffs] = useState([]);
 
   const chains = [
     { id: 1, symbol: "eth", name: "Ethereum", icon: <EthereumIcon /> },
-    { id: 2, symbol: "matic", name: "Polygon", icon: <PolygonIcon /> },
+    // { id: 2, symbol: "matic", name: "Polygon", icon: <PolygonIcon /> },
   ];
 
   const [raffles, setRaffles] = useState([]);
@@ -41,24 +46,32 @@ export default function Raffles() {
   const [chain, setChain] = useState();
   const accounts = useAccountsValueContext();
 
+  let index = 0;
+
   let selectedChain = undefined;
+
+  async function fetchRaffles() {
+    setIsLoading(true);
+    setIsError(false);
+    try {
+      const results = await Contract(RaffleManagerMeta)
+        .methods.getRafflesByIndex(index, 10)
+        .call();
+
+      console.log("r1 ", results);
+      
+      setRaffles(results);
+      setIsLoading(false);
+    } catch(e) {
+      console.log(e)
+      setIsError(true);
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (selectedChain !== undefined && chain === undefined) {
       setChain(selectedChain);
-    }
-
-    async function fetchRaffles() {
-      setIsLoading(true);
-      setIsError(false);
-      try {
-        const results = await axios("http://localhost:3000/api/raffles/");
-        setRaffles(results.data);
-        setIsLoading(false);
-      } catch {
-        setIsError(true);
-        setIsLoading(false);
-      }
     }
     fetchRaffles();
   }, [chain]);
@@ -113,44 +126,28 @@ export default function Raffles() {
     return <p>Error!!</p>;
   }
 
-  let raffleManager = Contract(RaffleManagerMeta);
-  let raffle = Contract(RaffleMeta);
-
-  function methodShowAll() {
-    raffleManager.methods
-      .showAll()
-      .call()
-      .then((result) => {
-        console.log("showAll success", result);
-      });
+  function formatTimestamp(timestamp) {
+    let dt = new Date(timestamp);
+    return (
+      dt.getFullYear() +
+      "년 " +
+      (dt.getMonth() + 1) +
+      "월 " +
+      dt.getDate() +
+      "일 " +
+      dt.getHours() +
+      "시 " +
+      dt.getMinutes() +
+      "분"
+    );
   }
 
-  function methodCreateAnotherContract(num) {
-    raffleManager.methods
-      .createAnotherContract(num)
-      .send({ from: accounts[0] })
-      .then((result) => {
-        console.log("success!!", result);
-      });
-  }
-
-  function methodGetValue() {
-    raffle.methods
-      .getValue()
-      .call()
-      .then((result) => {
-        console.log("getValue success", result);
-      });
+  function calculateTicketPrice(price, pointer) {
+    return parseInt(price) / Math.pow(10, parseInt(pointer));
   }
 
   return (
-    <Container
-      style={contentBoxStyle}
-      onClick={() => {
-        methodShowAll();
-        methodGetValue();
-      }}
-    >
+    <Container style={contentBoxStyle}>
       <Stack direction="horizontal" style={filterLayerStyle}>
         <Dropdown>
           <Dropdown.Toggle
@@ -186,9 +183,11 @@ export default function Raffles() {
         </Dropdown>
       </Stack>
 
-      <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-        {raffles.map((raffle, idx) => {
-          if (raffle.nft.chain.id === selectedChain.id) {
+      {/* <Row xs={1} sm={2} md={3} lg={4} className="g-4"> */}
+      <Row xs={1} sm={1} md={2} lg={2} xl={3} xxl={4} className="g-4">
+        {raffles.map((raffle) => {
+          if (true) {
+            // if (raffle.nft.chain.id === selectedChain.id) {
             return (
               <Col>
                 <Card>
@@ -197,25 +196,42 @@ export default function Raffles() {
                     src="http://localhost:3000/static/media/Logo.0f193fad515c0d2463ac44ec95490c0f.svg"
                   />
                   <Card.Body className="bg-secondary">
-                    <Card.Title>{raffle.nft.name}</Card.Title>
+                    {/* <Card.Title>{raffle.nft.name}</Card.Title> */}
+                    <Card.Title>{`${raffle.nftName} #${raffle.nftTokenId}`}</Card.Title>
                     <Card.Text>
-                      Chain: {raffle.nft.chain.symbol} <br />
-                      Ticket Price: {raffle.ticketPrice} <br />
-                      Total Tickets: {raffle.totalTicketNum} <br />
+                      <Row>
+                        <Col>종료 시각</Col>
+                        <Col style={cardTextRightItemStyle}>
+                          {formatTimestamp(parseInt(raffle.expiredAt) * 1000)}
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>티켓 가격</Col>
+                        <Col style={cardTextRightItemStyle}>
+                          {calculateTicketPrice(
+                            raffle.ticketPrice,
+                            raffle.ticketPricePointer
+                          )}{" "}
+                          ETH
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col>티켓 현황</Col>
+                        <Col
+                          style={cardTextRightItemStyle}
+                        >{`${raffle.soldTickets}/${raffle.ticketCap}`}</Col>
+                      </Row>
                     </Card.Text>
                     <div className="d-grid gap-2">
                       <Button
                         variant="primary"
                         onClick={() => {
                           navigate(
-                            `/raffles/` +
-                              selectedChain.symbol +
-                              `/` +
-                              raffle.contractId
+                            `/raffles/${selectedChain.symbol}/${raffle.raffleContract}`
                           );
                         }}
                       >
-                        참여하기
+                        보러가기
                       </Button>
                     </div>
                   </Card.Body>

@@ -10,11 +10,18 @@ export const AccountsProvider = ({children}) => {
     function handleNewAccounts(newAccounts) {
       setAccounts(newAccounts);
     }
+
+    function handleChainChanged(chainId) {
+      // TODO 체인 변경에 대한 올바른 계정 처리 필요
+      setAccounts([]);
+    }
+
     if (MetaMaskOnboarding.isMetaMaskInstalled()) {
       window.ethereum
         .request({ method: "eth_requestAccounts" })
         .then(handleNewAccounts);
       window.ethereum.on("accountsChanged", handleNewAccounts);
+      window.ethereum.on("chainChanged", handleChainChanged);
       return () => {
         window.ethereum.removeListener("accountsChanged", handleNewAccounts);
       };
