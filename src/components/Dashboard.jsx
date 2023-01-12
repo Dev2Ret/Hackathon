@@ -1,6 +1,7 @@
 import { React, useState, useEffect } from "react";
 import { useAccountsValueContext } from "@contexts/AccountsContext";
 import NFTCard from "@molecules/NFTCard"
+import { fetchMetadata } from "@services/nft-metadata-fetcher";
 
 // Setup: npm install alchemy-sdk
 import { Alchemy, Network } from "alchemy-sdk";
@@ -20,35 +21,60 @@ export default function Dashboard() {
 
   const settings = {
     apiKey: process.env.REACT_APP_ALCHEMY_API_KEY,
-    network: Network.ETH_MAINNET,
-    // network: Network.ETH_GOERLI
+    // network: Network.ETH_MAINNET,
+    network: Network.ETH_GOERLI
   };
   const alchemy = new Alchemy(settings);
 
   async function fetchNfts() {
+    // setIsLoading(true);
+    //   setIsError(false);
+    //   try {
+    //     // Get all NFTs
+    //     const nfts = await alchemy.nft.getNftsForOwner(address1);
+
+    //     // Get floor price
+    //     // const fp = await alchemy.nft.getFloorPrice(
+    //     //   "0xb18380485f7bA9C23Deb729bEDD3A3499Dbd4449"
+    //     // );
+
+    //     // const nfts = await alchemy.nft.getNftMetadata()
+
+    //     // Parse output
+    //     const numNfts = nfts["totalCount"];
+    //     const nftList = nfts["ownedNfts"];
+
+    //     setMetadata(nftList);
+    //     setIsLoading(false);
+    //   } catch {
+    //     setIsError(true);
+    //     setIsLoading(false);
+    //   }
+
     setIsLoading(true);
-      setIsError(false);
-      try {
-        // Get all NFTs
-        const nfts = await alchemy.nft.getNftsForOwner(address1);
+    setIsError(false);
+    try {
+      // Get all NFTs by account
+      const nfts = await alchemy.nft.getNftsForOwner(accounts[0]);
+      // Parse output
+      // const numNfts = nfts["totalCount"];
+      const nftList = nfts["ownedNfts"];
 
-        // Get floor price
-        // const fp = await alchemy.nft.getFloorPrice(
-        //   "0xb18380485f7bA9C23Deb729bEDD3A3499Dbd4449"
-        // );
+      for(let nft in nftList) {
 
-        // const nfts = await alchemy.nft.getNftMetadata()
-
-        // Parse output
-        const numNfts = nfts["totalCount"];
-        const nftList = nfts["ownedNfts"];
-
-        setMetadata(nftList);
-        setIsLoading(false);
-      } catch {
-        setIsError(true);
-        setIsLoading(false);
       }
+
+      setMetadata(nftList);
+
+      console.log(nftList);
+
+      setIsLoading(false);
+    } catch(e) {
+      console.log(e);
+      setIsError(true);
+      setIsLoading(false);
+    }
+
   }
 
   useEffect(() => {
@@ -76,22 +102,48 @@ export default function Dashboard() {
   const openseaLink = [];
   const imageUrl = [];
 
-  function getImageUrl(data) {
-    data.map((item, index) => {
+  const [images, setImages] = useState([]);
+
+  async function getImageUrl(data) {
+
+    const temps = [];
+    data.map(async (item, index) => {
+      const nftMeta = await fetchMetadata(item.tokenUri.raw);
       // if (item.contract.openSea.floorPrice >= 0.01) {
       // get ipfs image link
-      imageUrl[index] = item.contract.openSea.imageUrl;
+      // imageUrl[index] = item.contract.openSea.imageUrl;
+
+      // imageUrl[index] = nftMeta.image;
+
+      temps.push(nftMeta.images);
+      // images.push(nftMeta.image);
+
       // } else {
       //   imageUrl[index] = undefined;
       // }
     });
+    setImages(temps);
     return imageUrl;
   }
 
+  getImageUrl();
+
+  if(isLoading) {
+    return (<Spinner />);
+  }
+
+  if(isError) {
+    return (<p>Error!!</p>)
+  }
+
   if (metadata && accounts.length > 0) {
-    return <NFTCard imageUrl={getImageUrl(metadata).filter(Boolean)} openseaUrl={getOpenseaUrl(metadata).filter(Boolean)}/>;
-  } else {
-    return <Spinner />;
+    return (
+      <NFTCard
+        // imageUrl={getImageUrl(metadata).filter(Boolean)}
+        imageUrl={images}
+        openseaUrl={getOpenseaUrl(metadata).filter(Boolean)}
+      />
+    );
   }
   
 }

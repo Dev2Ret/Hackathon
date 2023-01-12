@@ -18,6 +18,9 @@ export default function NFTCard({ imageUrl, openseaUrl }) {
   function nextButton() {}
   function participated() {}
   function uploaded() {}
+
+  console.log("iiii", imageUrl);
+
   return (
     <>
       <h1>My NFT collections</h1>

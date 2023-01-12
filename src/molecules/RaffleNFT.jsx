@@ -6,6 +6,7 @@ import { useAccountsValueContext } from "@contexts/AccountsContext";
 import { RaffleManagerMeta } from "@eth/contracts/RaffleManagerMeta";
 import { Contract } from "@eth/Web3";
 import { fetchMetadata } from "@services/nft-metadata-fetcher";
+import RaffleState from "@assets/RaffleState";
 
 const selectedImageStyle = {
   width: "240px",
@@ -74,14 +75,20 @@ export default function RaffleNFT({
             .methods.getRaffleNFTsByOwner(accounts[0])
             .call();
 
+          console.log("listed", listedNfts);
+
           // const unlistedNfts = nfts["ownedNfts"];
           const unlistedNfts = nfts["ownedNfts"].filter((nft) => {
             for(let listedNft of listedNfts) {
+              if(parseInt(listedNft.state) !== RaffleState.Ongoing) {
+                return true;
+              }
               if (
                 nft.tokenId.localeCompare(listedNft.tokenId) === 0 &&
                 nft.contract.address
                   .toLowerCase()
-                  .localeCompare(listedNft.contractAddress.toLowerCase()) === 0
+                  .localeCompare(listedNft.contractAddress.toLowerCase()) ===
+                  0
               ) {
                 return false;
               }

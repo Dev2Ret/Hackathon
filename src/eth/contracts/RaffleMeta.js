@@ -34,18 +34,20 @@ export const RaffleMeta = {
           type: "uint16",
         },
         {
-          internalType: "uint32",
+          internalType: "uint256",
           name: "_ticketPrice",
-          type: "uint32",
-        },
-        {
-          internalType: "uint8",
-          name: "_ticketPricePointer",
-          type: "uint8",
+          type: "uint256",
         },
       ],
       stateMutability: "nonpayable",
       type: "constructor",
+    },
+    {
+      inputs: [],
+      name: "checkTimeout",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
     },
     {
       inputs: [],
@@ -102,6 +104,24 @@ export const RaffleMeta = {
           internalType: "string",
           name: "",
           type: "string",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "getOwnerInfo",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool",
         },
       ],
       stateMutability: "view",
@@ -187,9 +207,9 @@ export const RaffleMeta = {
           type: "uint16",
         },
         {
-          internalType: "uint32",
+          internalType: "uint256",
           name: "",
-          type: "uint32",
+          type: "uint256",
         },
         {
           internalType: "uint8",
@@ -211,6 +231,51 @@ export const RaffleMeta = {
         },
       ],
       stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "getStateNum",
+      outputs: [
+        {
+          internalType: "uint8",
+          name: "",
+          type: "uint8",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "getWinnerInfo",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "giveAllBalanceToOwner",
+      outputs: [],
+      stateMutability: "payable",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "giveNftToWinner",
+      outputs: [],
+      stateMutability: "nonpayable",
       type: "function",
     },
     {
@@ -291,7 +356,7 @@ export const RaffleMeta = {
       name: "owner",
       outputs: [
         {
-          internalType: "address",
+          internalType: "address payable",
           name: "",
           type: "address",
         },
@@ -302,16 +367,6 @@ export const RaffleMeta = {
     {
       inputs: [
         {
-          internalType: "address",
-          name: "purchaser",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "timestamp",
-          type: "uint256",
-        },
-        {
           internalType: "uint16",
           name: "tickets",
           type: "uint16",
@@ -319,7 +374,7 @@ export const RaffleMeta = {
       ],
       name: "purchaseTickets",
       outputs: [],
-      stateMutability: "nonpayable",
+      stateMutability: "payable",
       type: "function",
     },
     {
@@ -340,22 +395,9 @@ export const RaffleMeta = {
       name: "ticketPrice",
       outputs: [
         {
-          internalType: "uint32",
+          internalType: "uint256",
           name: "",
-          type: "uint32",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "ticketPricePointer",
-      outputs: [
-        {
-          internalType: "uint8",
-          name: "",
-          type: "uint8",
+          type: "uint256",
         },
       ],
       stateMutability: "view",

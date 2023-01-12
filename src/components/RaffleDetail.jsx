@@ -10,13 +10,16 @@ import {
   Stack,
   Spinner,
   InputGroup,
-  Form
+  Form,
+  Alert
 } from "react-bootstrap";
 import styled from "styled-components";
 import { useAccountsValueContext } from "@contexts/AccountsContext";
 import { Contract } from "@eth/Web3";
 import { RaffleMeta } from "@eth/contracts/RaffleMeta";
 import { fetchMetadata } from "@services/nft-metadata-fetcher";
+import RaffleState from "@assets/RaffleState";
+import RaffleDetailCompleted from "@molecules/RaffleDetailCompleted";
 
 const raffleContainer = {
   margin: "10px 0",
@@ -116,6 +119,7 @@ const costBoxStyle = {
 }
 
 export default function RaffleDetail() {
+  const ETH_TO_WEI = 1000000000000000000;
 
   const accounts = useAccountsValueContext();
   const [raffle, setRaffle] = useState();
@@ -127,15 +131,19 @@ export default function RaffleDetail() {
   const [isLoading, setIsLoading] = useState(false);
   const [isPurchasing, setIsPurchasing] = useState(false);
   
+  const [winnerInfo, setWinnerInfo] = useState();
+  const [ownerInfo, setOwnerInfo] = useState();
+  
   const params = useParams();
 
-  useEffect(() => {
-    if(accounts.length > 0) {
+  const raffleMeta = {
+    address: params.contractAddress,
+    abi: RaffleMeta.abi,
+  };
 
-    } else {
-      
-    }
-  }, [accounts, raffle]);
+  useEffect(() => {
+    fetchRaffle();
+  }, [accounts]);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -170,15 +178,8 @@ export default function RaffleDetail() {
     setIsLoading(true);
     setIsError(false);
     try {
-      const raffleMeta = {
-        address: params.contractAddress,
-        abi: RaffleMeta.abi,
-      };
 
       const results = await Contract(raffleMeta).methods.getRaffle().call();
-
-      console.log(results);
-
       const purchases = await Contract(raffleMeta)
         .methods.getPurchases()
         .call();
@@ -194,11 +195,35 @@ export default function RaffleDetail() {
         expiredAt: parseInt(results[7]),
         ticketCap: parseInt(results[8]),
         ticketPrice: parseInt(results[9]),
-        ticketPricePointer: parseInt(results[10]),
         nftMeta: await fetchMetadata(results[6]),
+        state: parseInt(results[10])
+        // state: RaffleState.Completed,
       };
 
-      console.log("pppp", purchases);
+      console.log("rrrr", raffle);
+
+      if(raffle.state === RaffleState.Completed) {
+        const winnerRes = await Contract(raffleMeta)
+          .methods.getWinnerInfo()
+          .call();
+        const ownerRes = await Contract(raffleMeta)
+          .methods.getOwnerInfo()
+          .call();
+
+        const _winnerInfo = {
+          winner: winnerRes[0],
+          given: winnerRes[1]
+        }
+
+        const _ownerInfo = {
+          owner: ownerRes[0],
+          given: ownerRes[1],
+        };
+
+        setWinnerInfo(_winnerInfo);
+        setOwnerInfo(_ownerInfo);
+      }
+
       let total = 0;
       for (let i = 0; i < purchases.length; i++) {
         total += parseInt(purchases[i].tickets);
@@ -216,13 +241,9 @@ export default function RaffleDetail() {
     }
   }
 
-  useEffect(() => {
-    fetchRaffle();
-  }, []);
-
   function calculateCost() {
     const cost =
-      tickets * (raffle.ticketPrice / Math.pow(10, raffle.ticketPricePointer));
+      tickets * (raffle.ticketPrice / ETH_TO_WEI);
     return isNaN(cost) ? 0 : parseFloat(cost.toFixed(4));
   }
 
@@ -245,14 +266,15 @@ export default function RaffleDetail() {
       };
 
       const receipt = await Contract(raffleMeta)
-        .methods.purchaseTickets(
-          accounts[0],
-          Math.floor(new Date().getTime() / 1000),
-          tickets
-        )
-        .send({ from: accounts[0] });
+        .methods.purchaseTickets(tickets)
+        .send({
+          from: accounts[0],
+          value: tickets * raffle.ticketPrice
+        });
 
       console.log("rs : ", receipt);
+
+      setTickets(0);
 
       setIsPurchasing(false);
 
@@ -270,6 +292,8 @@ export default function RaffleDetail() {
     //   );
     // });
   }
+
+  
 
   if (isLoading) {
     return (
@@ -302,10 +326,16 @@ export default function RaffleDetail() {
                       남은 시간
                     </Col>
                     <Col sm={8} style={contentItemStyle}>
-                      {findTimeDiffInDays(timeDiff)}일{" "}
-                      {findTimeDiffInHours(timeDiff)}시{" "}
-                      {findTimeDiffInMins(timeDiff)}분{" "}
-                      {findTimeDiffInSecs(timeDiff)}초{" "}
+                      {raffle.ended ? (
+                        <>마감됨</>
+                      ) : (
+                        <>
+                          {findTimeDiffInDays(timeDiff)}일{" "}
+                          {findTimeDiffInHours(timeDiff)}시{" "}
+                          {findTimeDiffInMins(timeDiff)}분{" "}
+                          {findTimeDiffInSecs(timeDiff)}초{" "}
+                        </>
+                      )}
                     </Col>
                   </Row>
                 </ContentItem>
@@ -316,9 +346,7 @@ export default function RaffleDetail() {
                       티켓 가격
                     </Col>
                     <Col sm={8} style={contentItemStyle}>
-                      {raffle.ticketPrice /
-                        Math.pow(10, raffle.ticketPricePointer)}{" "}
-                      ETH
+                      {`${raffle.ticketPrice / ETH_TO_WEI} ETH`}
                     </Col>
                   </Row>
                 </ContentItem>
@@ -358,47 +386,75 @@ export default function RaffleDetail() {
               </Stack>
 
               <RaffleContentsFooter className="d-grid gap-2">
-                <Row>
-                  <Col>
-                    <InputGroup>
-                      <InputGroup.Text
-                        style={inputGroupTextStyle}
-                        id="basic-addon1"
-                      >
-                        티켓
-                      </InputGroup.Text>
-                      <Form.Control
-                        type="number"
-                        aria-label="Tickets"
-                        aria-describedby="basic-addon1"
-                        min={0}
-                        max={raffle.ticketCap - soldTicketsNum}
-                        value={tickets}
-                        disabled={isPurchasing}
-                        onChange={handleTicketChange}
-                      />
-                    </InputGroup>
-                  </Col>
-                  <Col style={costBoxStyle}>= {calculateCost()} ETH</Col>
-                </Row>
+                {raffle.state === RaffleState.Completed ? (
+                  <RaffleDetailCompleted
+                    winnerInfo={winnerInfo}
+                    ownerInfo={ownerInfo}
+                    account={accounts[0]}
+                    raffleMeta={raffleMeta}
+                    fetchRaffle={fetchRaffle}
+                    ticketCap={raffle.ticketCap}
+                    ticketPrice={raffle.ticketPrice}
+                  />
+                ) : raffle.state === RaffleState.Canceled ? (
+                  <></>
+                ) : raffle.state === RaffleState.Timeout ? (
+                  <></>
+                ) : raffle.state === RaffleState.Ongoing ? (
+                  <>
+                    <Row>
+                      <Col>
+                        <InputGroup>
+                          <InputGroup.Text
+                            style={inputGroupTextStyle}
+                            id="basic-addon1"
+                          >
+                            티켓
+                          </InputGroup.Text>
+                          <Form.Control
+                            type="number"
+                            aria-label="Tickets"
+                            aria-describedby="basic-addon1"
+                            min={0}
+                            max={raffle.ticketCap - soldTicketsNum}
+                            value={tickets}
+                            disabled={isPurchasing}
+                            onChange={handleTicketChange}
+                          />
+                        </InputGroup>
+                      </Col>
+                      <Col style={costBoxStyle}>= {calculateCost()} ETH</Col>
+                    </Row>
 
-                <Button
-                  variant="primary"
-                  disabled={isPurchasing}
-                  onClick={purchaseTickets}
-                >
-                  {isPurchasing ? (
-                    <Spinner
-                      as="span"
-                      animation="border"
-                      size="sm"
-                      role="status"
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <>티켓 구매하기</>
-                  )}
-                </Button>
+                    <Button
+                      variant="primary"
+                      disabled={isPurchasing}
+                      onClick={purchaseTickets}
+                    >
+                      {isPurchasing ? (
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <>티켓 구매하기</>
+                      )}
+                    </Button>
+                  </>
+                ) : null}
+
+                {/* {raffle.state !== RaffleState.Ongoing ? (
+                  <>
+                    <Alert variant={"primary"}>
+                      해당 래플은 마감 되었습니다.
+                    </Alert>
+                  </>
+                ) : (
+                  <></>
+                )} */}
               </RaffleContentsFooter>
             </Stack>
           </Col>

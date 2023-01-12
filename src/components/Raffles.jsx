@@ -48,6 +48,8 @@ const cardBodyStyle = {
 }
 
 export default function Raffles() {
+  const ETH_TO_WEI = 1000000000000000000;
+
   const navigate = useNavigate();
   const params = useParams();
   const [timeDiffs, setTimeDiffs] = useState([]);
@@ -91,14 +93,14 @@ export default function Raffles() {
           soldTickets: parseInt(results[i].soldTickets),
           ticketCap: parseInt(results[i].ticketCap),
           ticketPrice: parseInt(results[i].ticketPrice),
-          ticketPricePointer: parseInt(results[i].ticketPricePointer),
-          nftMeta: await fetchMetadata(results[i].nftTokenURI)
+          nftMeta: await fetchMetadata(results[i].nftTokenURI),
+          state: parseInt(results[i].state)
         };
+
+        console.log("xxx", results[i])
 
         raffles.push(raffle);
       }
-
-      console.log("r1 ", raffles);
       
       setRaffles(raffles);
       setIsLoading(false);
@@ -248,17 +250,15 @@ export default function Raffles() {
                       <Row>
                         <Col xs={4}>종료 시각</Col>
                         <Col xs={8} style={cardTextRightItemStyle}>
-                          {formatTimestamp(raffle.expiredAt * 1000)}
+                          {raffle.ended
+                            ? "마감됨"
+                            : formatTimestamp(raffle.expiredAt * 1000)}
                         </Col>
                       </Row>
                       <Row>
                         <Col xs={4}>티켓 가격</Col>
                         <Col xs={8} style={cardTextRightItemStyle}>
-                          {calculateTicketPrice(
-                            raffle.ticketPrice,
-                            raffle.ticketPricePointer
-                          )}{" "}
-                          ETH
+                          {`${raffle.ticketPrice / ETH_TO_WEI} ETH`}
                         </Col>
                       </Row>
                       <Row>
@@ -278,7 +278,9 @@ export default function Raffles() {
                           );
                         }}
                       >
-                        참가하기
+                        {raffle.state !== 1
+                          ? "마감 된 래플 보러가기"
+                          : "참가하기"}
                       </Button>
                     </div>
                   </Card.Body>

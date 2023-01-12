@@ -24,6 +24,8 @@ export default function RaffleTicket({
   setTicketPrice,
 }) {
 
+  const UNIT = 4;
+
   function checkTotalTicketNum(value) {
     if(value < 0) {
       setTotalTicketNum(0);
@@ -37,12 +39,12 @@ export default function RaffleTicket({
   }
 
   function checkTicketPrice(value) {
-    let temp = Math.pow(10, 4) * value;
+    let temp = Math.pow(10, UNIT) * value;
 
     if (value < 0) {
       setTicketPrice(0);
     } else if (temp - Math.floor(temp) > 0) {
-      setTicketPrice((value * 10).toFixed(4));
+      setTicketPrice((value * 10).toFixed(UNIT));
     } else {
       setTicketPrice(value);
     }
