@@ -5,6 +5,9 @@ import styled from "styled-components";
 import { Contract } from "@eth/Web3";
 import { RaffleManagerMeta } from "src/eth/contracts/RaffleManagerMeta";
 import { useState } from "react";
+import { fetchMetadata } from "@services/nft-metadata-fetcher";
+import { useEffect } from "react";
+import erc721abi from "@eth/ERC721ABI.json"
 
 const raffleContainer = {
   margin: "10px 0",
@@ -28,7 +31,7 @@ const contentsContainer = {
 const imageStyle = {
   width: "100%",
   height: "100%",
-  "object-fit": "fill",
+  "object-fit": "contain",
 };
 
 const contentItemStyle = {
@@ -71,6 +74,18 @@ export default function RaffleCheck({
 }) {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [imageSrc, setImageSrc] = useState();
+
+  const UNIT = 4;
+  const ETH_TO_WEI = 1000000000000000000;
+
+  useEffect(() => {
+    async function fetchAndsetImage() {
+      const nftMeta = await fetchMetadata(selectedNFT.tokenUri.raw);
+      setImageSrc(nftMeta.image);
+    }
+    fetchAndsetImage();
+  }, []);
 
   let dt = new Date(endTimestamp);
   let stringDt =
@@ -102,19 +117,44 @@ export default function RaffleCheck({
 
       while (ticketPriceInteger !== Math.floor(ticketPriceInteger)) {
         ticketPricePointer += 1;
-        ticketPriceInteger = parseFloat((ticketPriceInteger * 10).toFixed(4));
+        ticketPriceInteger = parseFloat((ticketPriceInteger * 10).toFixed(UNIT));
       }
+
+      const nftMeta = {
+        address: selectedNFT.contract.address,
+        abi: erc721abi
+      }
+
+      const isApprovedForAll = await Contract(nftMeta).methods.isApprovedForAll(
+        accounts[0],
+        RaffleManagerMeta.address
+      ).call();
+
+      console.log("approved", isApprovedForAll)
+      if(!isApprovedForAll) {
+        await Contract(nftMeta).methods.setApprovalForAll(
+          RaffleManagerMeta.address,
+          true
+        ).send({ from: accounts[0] });
+      }
+
+      // const contract = Contract(nftAddress, erc721abi, signer); //signer is B
+      // const isApprovedForAll = await contract.isApprovedForAll(
+      //   signerAddress,
+      //   marketplaceAddress
+      // );
+      // if (!isApprovedForAll) {
+      //   await contract.setApprovalForAll(maketplaceAddress, true);
+      // }
 
       const receipt = await Contract(RaffleManagerMeta)
         .methods.createRaffle(
-          accounts[0],
           selectedNFT.contract.address,
           selectedNFT.tokenId,
           parseNFTTokenTypeToInt(selectedNFT.tokenType),
-          endTimestamp / 1000,
+          parseInt(endTimestamp / 1000),
           totalTicketNum,
-          ticketPriceInteger,
-          ticketPricePointer
+          (ticketPrice * ETH_TO_WEI).toString()
         )
         .send({ from: accounts[0] });
 
@@ -129,7 +169,7 @@ export default function RaffleCheck({
       );
     } catch(e) {
       setIsLoading(false);
-      console.log("isloading false");
+      console.log("failed to create: ", e);
     }
 
     // .then((receipt) => {
@@ -140,53 +180,20 @@ export default function RaffleCheck({
     // });
   }
 
-  // function createRaffle() {
-  //   let ticketPricePointer = 0;
-  //   let ticketPriceInteger = ticketPrice;
-
-  //   while (Math.floor(ticketPriceInteger) !== ticketPriceInteger) {
-  //     ticketPricePointer += 1;
-  //     ticketPriceInteger *= 10;
-  //   }
-
-  //   Contract(RaffleManagerMeta)
-  //     .methods.createRaffle(
-  //       accounts[0],
-  //       selectedNFT.contract.address,
-  //       selectedNFT.tokenId,
-  //       parseNFTTokenTypeToInt(selectedNFT.tokenType),
-  //       endTimestamp / 1000,
-  //       totalTicketNum,
-  //       ticketPriceInteger,
-  //       ticketPricePointer
-  //     )
-  //     .send({ from: accounts[0] })
-  //     .then((receipt) => {
-  //       navigate(
-  //         `/raffles/eth/` +
-  //           receipt.events.NFTRaffleCreated.returnValues.raffleAddress
-  //       );
-  //     });
-  // }
-
   return (
     <>
-      <h3>Raffle Check</h3>
-      { isLoading ? (
-          <Spinner animation="border" role="status" style={spinnerStyle}>
-            <span className="visually-hidden">Loading...</span>
-          </Spinner>
-        ) : null
-      }
+      <h3>래플 확인</h3>
+      {isLoading ? (
+        <Spinner animation="border" role="status" style={spinnerStyle}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      ) : null}
       <Row className="justify-content-md-center" style={raffleContainer}>
         <Col style={imageWrapper} lg="2">
-          <Image
-            style={imageStyle}
-            src="http://localhost:3000/static/media/Logo.0f193fad515c0d2463ac44ec95490c0f.svg"
-          />
+          <Image style={imageStyle} src={imageSrc} />
         </Col>
         <Col style={contentsContainer} lg="2">
-          <NFTName>{selectedNFT.name}</NFTName>
+          <NFTName>{`${selectedNFT.title}`}</NFTName>
           <Stack gap={4}>
             <ContentItem className="bg-light border">
               <Row>
@@ -214,7 +221,7 @@ export default function RaffleCheck({
                   티켓 가격
                 </Col>
                 <Col sm={8} style={contentItemStyle}>
-                  {ticketPrice}
+                  {`${ticketPrice} ETH`}
                 </Col>
               </Row>
             </ContentItem>
@@ -237,7 +244,7 @@ export default function RaffleCheck({
           <Button
             style={fullyWidenStyle}
             variant="primary"
-            // disabled={selectedNFT === undefined}
+            disabled={isLoading}
             onClick={toRaffleTicket}
           >
             이전
@@ -247,7 +254,7 @@ export default function RaffleCheck({
           <Button
             style={fullyWidenStyle}
             variant="primary"
-            // disabled={selectedNFT === undefined}
+            disabled={isLoading}
             onClick={createRaffle}
           >
             완료

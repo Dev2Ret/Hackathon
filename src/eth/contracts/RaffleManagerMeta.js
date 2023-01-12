@@ -1,5 +1,5 @@
 export const RaffleManagerMeta = {
-  address: "0x79861C00Cc2BD3626edC6343032bc2b7dE14a932",
+  address: "0xa1fDe45Bc7181eC001980Aca4e9745E7025d96a6",
   abi: [
     {
       inputs: [],
@@ -47,15 +47,9 @@ export const RaffleManagerMeta = {
         },
         {
           indexed: false,
-          internalType: "uint32",
+          internalType: "uint256",
           name: "ticketPrice",
-          type: "uint32",
-        },
-        {
-          indexed: false,
-          internalType: "uint8",
-          name: "ticketPricePointer",
-          type: "uint8",
+          type: "uint256",
         },
         {
           indexed: false,
@@ -75,7 +69,13 @@ export const RaffleManagerMeta = {
       type: "function",
     },
     {
-      inputs: [],
+      inputs: [
+        {
+          internalType: "address",
+          name: "raffleAddr",
+          type: "address",
+        },
+      ],
       name: "closeRaffle",
       outputs: [],
       stateMutability: "nonpayable",
@@ -83,11 +83,6 @@ export const RaffleManagerMeta = {
     },
     {
       inputs: [
-        {
-          internalType: "address",
-          name: "raffleOwner",
-          type: "address",
-        },
         {
           internalType: "address",
           name: "nftContract",
@@ -114,14 +109,9 @@ export const RaffleManagerMeta = {
           type: "uint16",
         },
         {
-          internalType: "uint32",
+          internalType: "uint256",
           name: "ticketPrice",
-          type: "uint32",
-        },
-        {
-          internalType: "uint8",
-          name: "ticketPricePointer",
-          type: "uint8",
+          type: "uint256",
         },
       ],
       name: "createRaffle",
@@ -204,19 +194,19 @@ export const RaffleManagerMeta = {
               type: "uint16",
             },
             {
-              internalType: "uint32",
+              internalType: "uint256",
               name: "ticketPrice",
-              type: "uint32",
-            },
-            {
-              internalType: "uint8",
-              name: "ticketPricePointer",
-              type: "uint8",
+              type: "uint256",
             },
             {
               internalType: "uint32",
               name: "index",
               type: "uint32",
+            },
+            {
+              internalType: "uint8",
+              name: "state",
+              type: "uint8",
             },
           ],
           internalType: "struct RaffleManager.RaffleDetail[]",
@@ -249,8 +239,13 @@ export const RaffleManagerMeta = {
               name: "tokenId",
               type: "uint256",
             },
+            {
+              internalType: "uint8",
+              name: "state",
+              type: "uint8",
+            },
           ],
-          internalType: "struct RaffleManager.SimpleNFT[]",
+          internalType: "struct RaffleManager.SimpleRaffle[]",
           name: "",
           type: "tuple[]",
         },
@@ -344,19 +339,19 @@ export const RaffleManagerMeta = {
               type: "uint16",
             },
             {
-              internalType: "uint32",
+              internalType: "uint256",
               name: "ticketPrice",
-              type: "uint32",
-            },
-            {
-              internalType: "uint8",
-              name: "ticketPricePointer",
-              type: "uint8",
+              type: "uint256",
             },
             {
               internalType: "uint32",
               name: "index",
               type: "uint32",
+            },
+            {
+              internalType: "uint8",
+              name: "state",
+              type: "uint8",
             },
           ],
           internalType: "struct RaffleManager.RaffleDetail[]",
@@ -365,6 +360,34 @@ export const RaffleManagerMeta = {
         },
       ],
       stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "nft",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "from",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "to",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "tokenId",
+          type: "uint256",
+        },
+      ],
+      name: "transferERC721",
+      outputs: [],
+      stateMutability: "payable",
       type: "function",
     },
   ],

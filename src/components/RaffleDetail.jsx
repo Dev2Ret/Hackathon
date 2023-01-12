@@ -8,11 +8,18 @@ import {
   Image,
   Button,
   Stack,
+  Spinner,
+  InputGroup,
+  Form,
+  Alert
 } from "react-bootstrap";
 import styled from "styled-components";
 import { useAccountsValueContext } from "@contexts/AccountsContext";
 import { Contract } from "@eth/Web3";
 import { RaffleMeta } from "@eth/contracts/RaffleMeta";
+import { fetchMetadata } from "@services/nft-metadata-fetcher";
+import RaffleState from "@assets/RaffleState";
+import RaffleDetailCompleted from "@molecules/RaffleDetailCompleted";
 
 const raffleContainer = {
   margin: "10px 0",
@@ -25,20 +32,6 @@ const imageWrapper = {
   // border: "1px solid black",
 };
 
-// const contentsContainer = {
-//   width: "422px",
-//   height: "422px",
-//   // border: "1px solid blue",
-//   padding: "12px",
-//   "text-align": "left",
-// };
-
-// const imageStyle = {
-//   width: "100%",
-//   height: "100%",
-//   "object-fit": "fill",
-// };
-
 const contentItemStyle = {
   "white-space": "nowrap",
   "text-overflow": "ellipsis",
@@ -49,9 +42,12 @@ const contentItemStyle = {
 const contentTitleStyle = {
   "font-size": "small",
 };
-
+  
 const leftItemStyle = {
   padding: "8px",
+  display: "flex",
+  "justify-content": "center",
+  "align-items": "center"
 };
 
 const rightItemStyle = {
@@ -69,7 +65,6 @@ const containerWrapper = {
 
 const imageStyle = {
   width: "100%",
-  height: "100%",
   "object-fit": "fill",
 };
 
@@ -85,6 +80,9 @@ const RaffleContentsBody = styled.div`
 
 const RaffleContentsFooter = styled.div`
   padding: 8px;
+  border: 1.4px solid #979797;
+  border-style: dashed;
+  margin-top: 8px;
 `;
 
 const ContentItem = styled.div`
@@ -107,25 +105,45 @@ const NFTName = styled.h4`
   overflow: hidden;
 `;
 
+const inputGroupTextStyle = {
+  "font-size": "small"
+}
+
+const fromControlStyle = {
+  "width": "120px"
+}
+
+const costBoxStyle = {
+  "display": "flex",
+  "align-items": "center"
+}
+
 export default function RaffleDetail() {
+  const ETH_TO_WEI = 1000000000000000000;
 
   const accounts = useAccountsValueContext();
   const [raffle, setRaffle] = useState();
   const [purchases, setPurchases] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [soldTicketsNum, setSoldTicketsNum] = useState(0);
   const [isError, setIsError] = useState(false);
   const [timeDiff, setTimeDiff] = useState(0);
-
+  const [tickets, setTickets] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+  
+  const [winnerInfo, setWinnerInfo] = useState();
+  const [ownerInfo, setOwnerInfo] = useState();
+  
   const params = useParams();
 
-  useEffect(() => {
-    if(accounts.length > 0) {
+  const raffleMeta = {
+    address: params.contractAddress,
+    abi: RaffleMeta.abi,
+  };
 
-    } else {
-      
-    }
-  }, [accounts, raffle]);
+  useEffect(() => {
+    fetchRaffle();
+  }, [accounts]);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -156,106 +174,133 @@ export default function RaffleDetail() {
     return parseInt(timeDiffSecs / 60 / 60 / 24);
   }
 
-  useEffect(() => {
-    async function fetchRaffle() {
-      setIsLoading(true);
-      setIsError(false);
-      try {
+  async function fetchRaffle() {
+    setIsLoading(true);
+    setIsError(false);
+    try {
 
-        const raffleMeta = {
-          address: params.contractAddress,
-          abi: RaffleMeta.abi
-        };
+      const results = await Contract(raffleMeta).methods.getRaffle().call();
+      const purchases = await Contract(raffleMeta)
+        .methods.getPurchases()
+        .call();
 
-        const results = await Contract(raffleMeta).methods.getRaffle().call();
+      const raffle = {
+        owner: results[0],
+        nftContractAddress: results[1],
+        nftTokenId: parseInt(results[2]),
+        nftTokenType: parseInt(results[3]),
+        nftName: results[4],
+        nftSymbol: results[5],
+        nftTokenURI: results[6],
+        expiredAt: parseInt(results[7]),
+        ticketCap: parseInt(results[8]),
+        ticketPrice: parseInt(results[9]),
+        nftMeta: await fetchMetadata(results[6]),
+        state: parseInt(results[10])
+        // state: RaffleState.Completed,
+      };
 
-        console.log(results);
+      console.log("rrrr", raffle);
 
-        const purchases = await Contract(raffleMeta).methods.getPurchases().call();
+      if(raffle.state === RaffleState.Completed) {
+        const winnerRes = await Contract(raffleMeta)
+          .methods.getWinnerInfo()
+          .call();
+        const ownerRes = await Contract(raffleMeta)
+          .methods.getOwnerInfo()
+          .call();
 
-        console.log("ppp", purchases);
-
-        const raffle = {
-          owner: results[0],
-          nftContractAddress: results[1],
-          nftTokenId: parseInt(results[2]),
-          nftTokenType: parseInt(results[3]),
-          nftName: results[4],
-          nftSymbol: results[5],
-          nftTokenURI: results[6],
-          expiredAt: parseInt(results[7]),
-          ticketCap: parseInt(results[8]),
-          ticketPrice: parseInt(results[9]),
-          ticketPricePointer: parseInt(results[10]),
-        };
-
-        let total = 0;
-        for(let i=0; i<purchases.length; i++) {
-          total += parseInt(purchases[i].tickets);
+        const _winnerInfo = {
+          winner: winnerRes[0],
+          given: winnerRes[1]
         }
 
-        setSoldTicketsNum(total);
-        setRaffle(raffle);
-        setPurchases(purchases);
+        const _ownerInfo = {
+          owner: ownerRes[0],
+          given: ownerRes[1],
+        };
 
-
-
-
-
-
-        // const tokenURIABI = [
-        //   {
-        //     inputs: [
-        //       {
-        //         internalType: "uint256",
-        //         name: "tokenId",
-        //         type: "uint256",
-        //       },
-        //     ],
-        //     name: "tokenURI",
-        //     outputs: [
-        //       {
-        //         internalType: "string",
-        //         name: "",
-        //         type: "string",
-        //       },
-        //     ],
-        //     stateMutability: "view",
-        //     type: "function",
-        //   },
-        // ];
-
-        // const tokenContract = results[1];
-        // const tokenId = parseInt(results[2]); // A token we'd like to retrieve its metadata of
-
-        // const nftMeta = {
-        //   address: tokenContract,
-        //   abi: tokenURIABI
-        // }
-        // const contract = Contract(nftMeta);
-
-        // async function getNFTMetadata() {
-        //   const result = await contract.methods.tokenURI(tokenId).call();
-        //   // const result = await contract.methods.ownerOf(tokenId).call();
-
-        //   console.log("nft result ", result); // ipfs://QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/101
-        // }
-
-        // getNFTMetadata();
-
-
-        setIsLoading(false);
-      } catch(e) {
-        console.log(e)
-        setIsError(true);
-        setIsLoading(false);
+        setWinnerInfo(_winnerInfo);
+        setOwnerInfo(_ownerInfo);
       }
+
+      let total = 0;
+      for (let i = 0; i < purchases.length; i++) {
+        total += parseInt(purchases[i].tickets);
+      }
+
+      setSoldTicketsNum(total);
+      setRaffle(raffle);
+      setPurchases(purchases);
+
+      setIsLoading(false);
+    } catch (e) {
+      console.log(e);
+      setIsError(true);
+      setIsLoading(false);
     }
-    fetchRaffle();
-  }, []);
+  }
+
+  function calculateCost() {
+    const cost =
+      tickets * (raffle.ticketPrice / ETH_TO_WEI);
+    return isNaN(cost) ? 0 : parseFloat(cost.toFixed(4));
+  }
+
+  function handleTicketChange(e) {
+    const value = parseInt(e.target.value);
+    if (value <= raffle.ticketCap - soldTicketsNum) {
+      setTickets(parseInt(e.target.value));
+    }
+  }
+
+  async function purchaseTickets() {
+    if(tickets < 1) return;
+
+    try {
+      setIsPurchasing(true);
+
+      const raffleMeta = {
+        address: params.contractAddress,
+        abi: RaffleMeta.abi,
+      };
+
+      const receipt = await Contract(raffleMeta)
+        .methods.purchaseTickets(tickets)
+        .send({
+          from: accounts[0],
+          value: tickets * raffle.ticketPrice
+        });
+
+      console.log("rs : ", receipt);
+
+      setTickets(0);
+
+      setIsPurchasing(false);
+
+      fetchRaffle();
+
+    } catch (e) {
+      setIsPurchasing(false);
+      console.log("purchase tickets error", e);
+    }
+
+    // .then((receipt) => {
+    //   navigate(
+    //     `/raffles/eth/` +
+    //       receipt.events.NFTRaffleCreated.returnValues.raffleAddress
+    //   );
+    // });
+  }
+
+  
 
   if (isLoading) {
-    return (<p>Loading..</p>);
+    return (
+      <Container fluid="md" style={containerWrapper}>
+        <Spinner />
+      </Container>
+    );
   }
 
   if (isError) {
@@ -269,34 +314,11 @@ export default function RaffleDetail() {
         <p>{raffle.nft.chain.symbol}</p> */}
         <Row className="justify-content-md-center" style={raffleContainer}>
           <Col sm={4} style={leftItemStyle} className="bg-secondary">
-            <Image
-              style={imageStyle}
-              src="http://localhost:3000/static/media/Logo.0f193fad515c0d2463ac44ec95490c0f.svg"
-            />
+            <Image style={imageStyle} src={raffle.nftMeta.image} />
           </Col>
           <Col sm={4} style={rightItemStyle} className="bg-secondary">
             <Stack style={contentsContainer}>
-              {/* <RaffleContentsHeader>{raffle.nftName}</RaffleContentsHeader>
-              <RaffleContentsBody>
-                <TimeContainer>
-                  남은 시간 : {findTimeDiffInDays(timeDiff)}일{" "}
-                  {findTimeDiffInHours(timeDiff)}시{" "}
-                  {findTimeDiffInMins(timeDiff)}분{" "}
-                  {findTimeDiffInSecs(timeDiff)}초{" "}
-                </TimeContainer>
-                <TicketsContainer>
-                  남은 티켓 수량 : {raffle.ticketCap}
-                </TicketsContainer>
-                <TicketPriceContainer>
-                  티켓 가격 :{" "}
-                  {raffle.ticketPrice / Math.pow(10, raffle.ticketPricePointer)}
-                </TicketPriceContainer>
-                <ContractAddressContainer>
-                  컨트랙트 주소 : {raffle.nftContractAddress}
-                </ContractAddressContainer>
-              </RaffleContentsBody> */}
-
-              <NFTName>{`${raffle.nftName} #${raffle.nftTokenId}`}</NFTName>
+              <NFTName>{`${raffle.nftMeta.name}`}</NFTName>
               <Stack gap={2}>
                 <ContentItem className="bg-light border">
                   <Row>
@@ -304,13 +326,31 @@ export default function RaffleDetail() {
                       남은 시간
                     </Col>
                     <Col sm={8} style={contentItemStyle}>
-                      {findTimeDiffInDays(timeDiff)}일{" "}
-                      {findTimeDiffInHours(timeDiff)}시{" "}
-                      {findTimeDiffInMins(timeDiff)}분{" "}
-                      {findTimeDiffInSecs(timeDiff)}초{" "}
+                      {raffle.ended ? (
+                        <>마감됨</>
+                      ) : (
+                        <>
+                          {findTimeDiffInDays(timeDiff)}일{" "}
+                          {findTimeDiffInHours(timeDiff)}시{" "}
+                          {findTimeDiffInMins(timeDiff)}분{" "}
+                          {findTimeDiffInSecs(timeDiff)}초{" "}
+                        </>
+                      )}
                     </Col>
                   </Row>
                 </ContentItem>
+
+                <ContentItem className="bg-light border">
+                  <Row>
+                    <Col sm={4} style={contentTitleStyle}>
+                      티켓 가격
+                    </Col>
+                    <Col sm={8} style={contentItemStyle}>
+                      {`${raffle.ticketPrice / ETH_TO_WEI} ETH`}
+                    </Col>
+                  </Row>
+                </ContentItem>
+
                 <ContentItem className="bg-light border">
                   <Row>
                     <Col sm={4} style={contentTitleStyle}>
@@ -321,18 +361,7 @@ export default function RaffleDetail() {
                     </Col>
                   </Row>
                 </ContentItem>
-                <ContentItem className="bg-light border">
-                  <Row>
-                    <Col sm={4} style={contentTitleStyle}>
-                      티켓 가격
-                    </Col>
-                    <Col sm={8} style={contentItemStyle}>
-                      {raffle.ticketPrice /
-                        Math.pow(10, raffle.ticketPricePointer)}{" "}
-                      ETH
-                    </Col>
-                  </Row>
-                </ContentItem>
+
                 <ContentItem className="bg-light border">
                   <Row>
                     <Col sm={4} style={contentTitleStyle}>
@@ -357,14 +386,75 @@ export default function RaffleDetail() {
               </Stack>
 
               <RaffleContentsFooter className="d-grid gap-2">
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    // parseLeftTime(raffle.ended);
-                  }}
-                >
-                  참여하기
-                </Button>
+                {raffle.state === RaffleState.Completed ? (
+                  <RaffleDetailCompleted
+                    winnerInfo={winnerInfo}
+                    ownerInfo={ownerInfo}
+                    account={accounts[0]}
+                    raffleMeta={raffleMeta}
+                    fetchRaffle={fetchRaffle}
+                    ticketCap={raffle.ticketCap}
+                    ticketPrice={raffle.ticketPrice}
+                  />
+                ) : raffle.state === RaffleState.Canceled ? (
+                  <></>
+                ) : raffle.state === RaffleState.Timeout ? (
+                  <></>
+                ) : raffle.state === RaffleState.Ongoing ? (
+                  <>
+                    <Row>
+                      <Col>
+                        <InputGroup>
+                          <InputGroup.Text
+                            style={inputGroupTextStyle}
+                            id="basic-addon1"
+                          >
+                            티켓
+                          </InputGroup.Text>
+                          <Form.Control
+                            type="number"
+                            aria-label="Tickets"
+                            aria-describedby="basic-addon1"
+                            min={0}
+                            max={raffle.ticketCap - soldTicketsNum}
+                            value={tickets}
+                            disabled={isPurchasing}
+                            onChange={handleTicketChange}
+                          />
+                        </InputGroup>
+                      </Col>
+                      <Col style={costBoxStyle}>= {calculateCost()} ETH</Col>
+                    </Row>
+
+                    <Button
+                      variant="primary"
+                      disabled={isPurchasing}
+                      onClick={purchaseTickets}
+                    >
+                      {isPurchasing ? (
+                        <Spinner
+                          as="span"
+                          animation="border"
+                          size="sm"
+                          role="status"
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <>티켓 구매하기</>
+                      )}
+                    </Button>
+                  </>
+                ) : null}
+
+                {/* {raffle.state !== RaffleState.Ongoing ? (
+                  <>
+                    <Alert variant={"primary"}>
+                      해당 래플은 마감 되었습니다.
+                    </Alert>
+                  </>
+                ) : (
+                  <></>
+                )} */}
               </RaffleContentsFooter>
             </Stack>
           </Col>

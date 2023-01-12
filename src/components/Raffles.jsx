@@ -8,6 +8,7 @@ import {
   Card,
   ToggleButton,
   Stack,
+  Spinner,
 } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 import EthereumIcon from "@assets/EthereumIcon";
@@ -19,6 +20,7 @@ import { RaffleManagerMeta } from "@eth/contracts/RaffleManagerMeta";
 import { RaffleMeta } from "@eth/contracts/RaffleMeta";
 import { Contract } from "@eth/Web3";
 import { useAccountsValueContext } from "@contexts/AccountsContext";
+import { fetchMetadata } from "@services/nft-metadata-fetcher";
 
 const contentBoxStyle = {
   padding: "16px",
@@ -27,10 +29,27 @@ const contentBoxStyle = {
 };
 
 const cardTextRightItemStyle = {
-  "text-align": "right"
+  "text-align": "right",
+  "font-size": "small"
+}
+
+const imageContainer = {
+  height: "100%"
+}
+
+const imageStyle = {
+  width: "100%",
+  height: "100%",
+  "object-fit": "contain",
+};
+
+const cardBodyStyle = {
+  "border-top": "1px solid #d2d2d2"
 }
 
 export default function Raffles() {
+  const ETH_TO_WEI = 1000000000000000000;
+
   const navigate = useNavigate();
   const params = useParams();
   const [timeDiffs, setTimeDiffs] = useState([]);
@@ -58,9 +77,32 @@ export default function Raffles() {
         .methods.getRafflesByIndex(index, 10)
         .call();
 
-      console.log("r1 ", results);
+      const raffles = [];
+      for(let i=0; i<results.length; i++) {
+        const raffle = {
+          expiredAt: parseInt(results[i].expiredAt),
+          index: parseInt(results[i].index),
+          nftContract: results[i].nftContract,
+          nftName: results[i].nftName,
+          nftSymbol: results[i].nftSymbol,
+          nftTokenId: parseInt(results[i].nftTokenId),
+          nftTokenType: parseInt(results[i].nftTokenType),
+          nftTokenURI: results[i].nftTokenURI,
+          owner: results[i].owner,
+          raffleContract: results[i].raffleContract,
+          soldTickets: parseInt(results[i].soldTickets),
+          ticketCap: parseInt(results[i].ticketCap),
+          ticketPrice: parseInt(results[i].ticketPrice),
+          nftMeta: await fetchMetadata(results[i].nftTokenURI),
+          state: parseInt(results[i].state)
+        };
+
+        console.log("xxx", results[i])
+
+        raffles.push(raffle);
+      }
       
-      setRaffles(results);
+      setRaffles(raffles);
       setIsLoading(false);
     } catch(e) {
       console.log(e)
@@ -119,7 +161,11 @@ export default function Raffles() {
   };
 
   if (isLoading) {
-    return <p>Loading..</p>;
+    return (
+      <Container style={contentBoxStyle}>
+        <Spinner />
+      </Container>
+    );
   }
 
   if (isError) {
@@ -143,7 +189,7 @@ export default function Raffles() {
   }
 
   function calculateTicketPrice(price, pointer) {
-    return parseInt(price) / Math.pow(10, parseInt(pointer));
+    return price / Math.pow(10, pointer);
   }
 
   return (
@@ -190,34 +236,35 @@ export default function Raffles() {
             // if (raffle.nft.chain.id === selectedChain.id) {
             return (
               <Col>
-                <Card>
+                <Card style={imageContainer}>
                   <Card.Img
                     variant="top"
-                    src="http://localhost:3000/static/media/Logo.0f193fad515c0d2463ac44ec95490c0f.svg"
+                    src={raffle.nftMeta.image}
+                    style={imageStyle}
+                    className="bg-secondary"
                   />
-                  <Card.Body className="bg-secondary">
+                  <Card.Body className="bg-secondary" style={cardBodyStyle}>
                     {/* <Card.Title>{raffle.nft.name}</Card.Title> */}
-                    <Card.Title>{`${raffle.nftName} #${raffle.nftTokenId}`}</Card.Title>
+                    <Card.Title>{`${raffle.nftMeta.name}`}</Card.Title>
                     <Card.Text>
                       <Row>
-                        <Col>종료 시각</Col>
-                        <Col style={cardTextRightItemStyle}>
-                          {formatTimestamp(parseInt(raffle.expiredAt) * 1000)}
+                        <Col xs={4}>종료 시각</Col>
+                        <Col xs={8} style={cardTextRightItemStyle}>
+                          {raffle.ended
+                            ? "마감됨"
+                            : formatTimestamp(raffle.expiredAt * 1000)}
                         </Col>
                       </Row>
                       <Row>
-                        <Col>티켓 가격</Col>
-                        <Col style={cardTextRightItemStyle}>
-                          {calculateTicketPrice(
-                            raffle.ticketPrice,
-                            raffle.ticketPricePointer
-                          )}{" "}
-                          ETH
+                        <Col xs={4}>티켓 가격</Col>
+                        <Col xs={8} style={cardTextRightItemStyle}>
+                          {`${raffle.ticketPrice / ETH_TO_WEI} ETH`}
                         </Col>
                       </Row>
                       <Row>
-                        <Col>티켓 현황</Col>
+                        <Col xs={4}>티켓 현황</Col>
                         <Col
+                          xs={8}
                           style={cardTextRightItemStyle}
                         >{`${raffle.soldTickets}/${raffle.ticketCap}`}</Col>
                       </Row>
@@ -231,7 +278,9 @@ export default function Raffles() {
                           );
                         }}
                       >
-                        보러가기
+                        {raffle.state !== 1
+                          ? "마감 된 래플 보러가기"
+                          : "참가하기"}
                       </Button>
                     </div>
                   </Card.Body>

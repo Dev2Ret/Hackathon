@@ -1,20 +1,24 @@
 import { React, useState, useEffect } from "react";
 import styled from "styled-components";
-import { Row, Col, Button, Image } from "react-bootstrap";
+import { Row, Col, Button, Image, Spinner } from "react-bootstrap";
 import { Alchemy, Network } from "alchemy-sdk";
 import { useAccountsValueContext } from "@contexts/AccountsContext";
 import { RaffleManagerMeta } from "@eth/contracts/RaffleManagerMeta";
 import { Contract } from "@eth/Web3";
+import { fetchMetadata } from "@services/nft-metadata-fetcher";
+import RaffleState from "@assets/RaffleState";
 
 const selectedImageStyle = {
   width: "240px",
   height: "240px",
-  border: "1px solid blue",
+  border: "10px inset #adb5bd",
+  "object-fit": "contain",
 };
 
 const unselectedImageStyle = {
   width: "240px",
   height: "240px",
+  "object-fit": "contain",
 };
 
 const NFTWrapper = {
@@ -71,20 +75,34 @@ export default function RaffleNFT({
             .methods.getRaffleNFTsByOwner(accounts[0])
             .call();
 
+          console.log("listed", listedNfts);
+
           // const unlistedNfts = nfts["ownedNfts"];
           const unlistedNfts = nfts["ownedNfts"].filter((nft) => {
             for(let listedNft of listedNfts) {
+              if(parseInt(listedNft.state) !== RaffleState.Ongoing) {
+                return true;
+              }
               if (
                 nft.tokenId.localeCompare(listedNft.tokenId) === 0 &&
                 nft.contract.address
                   .toLowerCase()
-                  .localeCompare(listedNft.contractAddress.toLowerCase()) === 0
+                  .localeCompare(listedNft.contractAddress.toLowerCase()) ===
+                  0
               ) {
                 return false;
               }
             }
             return true;
           })
+
+          console.log("llll", unlistedNfts)
+
+          for(let i=0; i<unlistedNfts.length; i++) {
+            console.log(unlistedNfts[i].tokenUri.raw);
+            const nftMeta = await fetchMetadata(unlistedNfts[i].tokenUri.raw);
+            unlistedNfts[i].imageSrc = nftMeta.image;
+          }
 
           setNfts(unlistedNfts);
 
@@ -99,7 +117,7 @@ export default function RaffleNFT({
   }, [accounts]);
 
   if (isLoading) {
-    return <p>Loading..</p>;
+    return <Spinner />;
   }
 
   if (isError) {
@@ -112,7 +130,7 @@ export default function RaffleNFT({
 
   return (
     <>
-      <h3>Raffle NFT</h3>
+      <h3>나의 NFT</h3>
 
       <Row className="justify-content-md-center">
         <Col md="auto">
@@ -140,12 +158,10 @@ export default function RaffleNFT({
                   >
                     <Image
                       style={imageStyle}
-                      // TODO ipfs로 부터 이미지 가져오는 방법 해결 후 대체
-                      src="http://localhost:3000/static/media/Logo.0f193fad515c0d2463ac44ec95490c0f.svg"
-                      // src={nft.tokenUri.raw}
-                      // src={nft.tokenUri.gateway}
+                      src={nft.imageSrc}
                     />
-                    <NFTName>{nft.contract.name + " #" + nft.tokenId}</NFTName>
+                    {/* <NFTName>{nft.contract.name + " #" + nft.tokenId}</NFTName> */}
+                    <NFTName>{nft.title}</NFTName>
                   </MyNFT>
                 </Col>
               );
