@@ -54,10 +54,12 @@ export default function RaffleDetailCompleted({
     }
   }
 
+  console.log("winnerInfo", winnerInfo)
+
   return (
     <>
       {winnerInfo.winner.toLowerCase().localeCompare(account.toLowerCase()) ===
-        0 || true ? (
+      0 ? (
         <div>
           <p>축하합니다. 래플에 당첨되었습니다.</p>
           {!winnerInfo.given ? (
@@ -87,9 +89,12 @@ export default function RaffleDetailCompleted({
         <div>래플에 당첨되지 않았습니다.</div>
       )}
       {ownerInfo.owner.toLowerCase().localeCompare(account.toLowerCase()) ===
-      0  && !ownerInfo.given ? (
+        0 && !ownerInfo.given ? (
         <div>
-          <p>래플이 성공적으로 마감되었으므로 모든 티켓 비용을 가져 갈 수 있습니다.</p>
+          <p>
+            래플이 성공적으로 마감되었으므로 모든 티켓 비용을 가져 갈 수
+            있습니다.
+          </p>
           <Button
             style={getPriceBtnStyle}
             variant="primary"
@@ -105,7 +110,7 @@ export default function RaffleDetailCompleted({
                 aria-hidden="true"
               />
             ) : (
-              <>{`${((ticketCap * ticketPrice) / ETH_TO_WEI)} ETH 가져가기`}</>
+              <>{`${(ticketCap * ticketPrice) / ETH_TO_WEI} ETH 가져가기`}</>
             )}
           </Button>
         </div>

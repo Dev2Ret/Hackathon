@@ -75,8 +75,6 @@ export default function RaffleNFT({
             .methods.getRaffleNFTsByOwner(accounts[0])
             .call();
 
-          console.log("listed", listedNfts);
-
           // const unlistedNfts = nfts["ownedNfts"];
           const unlistedNfts = nfts["ownedNfts"].filter((nft) => {
             for(let listedNft of listedNfts) {
@@ -96,10 +94,7 @@ export default function RaffleNFT({
             return true;
           })
 
-          console.log("llll", unlistedNfts)
-
           for(let i=0; i<unlistedNfts.length; i++) {
-            console.log(unlistedNfts[i].tokenUri.raw);
             const nftMeta = await fetchMetadata(unlistedNfts[i].tokenUri.raw);
             unlistedNfts[i].imageSrc = nftMeta.image;
           }
