@@ -280,6 +280,19 @@ export const RaffleMeta = {
     },
     {
       inputs: [],
+      name: "isOngoing",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
       name: "nftContract",
       outputs: [
         {

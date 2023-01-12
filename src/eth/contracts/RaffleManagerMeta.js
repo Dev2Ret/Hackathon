@@ -1,5 +1,5 @@
 export const RaffleManagerMeta = {
-  address: "0xa1fDe45Bc7181eC001980Aca4e9745E7025d96a6",
+  address: "0x1c27E791f30B3aF0F847800aF1a6eE662f866f8E",
   abi: [
     {
       inputs: [],
@@ -64,19 +64,6 @@ export const RaffleManagerMeta = {
     {
       inputs: [],
       name: "checkExpiredRaffles",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "raffleAddr",
-          type: "address",
-        },
-      ],
-      name: "closeRaffle",
       outputs: [],
       stateMutability: "nonpayable",
       type: "function",
