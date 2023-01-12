@@ -16,7 +16,7 @@ function App() {
       <AccountsProvider>
         <NavbarBr />
         <Routes>
-          <Route index element={<Raffles />}></Route>
+          <Route index element={<UploadNFT />}></Route>
           <Route path="raffles" element={<Raffles />}></Route>
           <Route path="raffles/:chain" element={<Raffles />}></Route>
           <Route
